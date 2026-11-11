@@ -1,0 +1,452 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Categories - Study Planner</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .cat-hero{padding:24px;border-radius:18px;background:linear-gradient(120deg,#263f32,#45694f);color:white;margin-bottom:20px}
+    .cat-hero p{color:#dce8dc;margin-bottom:0}
+    .cat-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:20px}
+    .cat-stat{background:white;border:1px solid var(--line);border-radius:15px;padding:17px}
+    .cat-stat small{color:var(--mut);display:block;font-size:12px}
+    .cat-stat strong{font-size:24px;color:var(--dark);display:block;margin-top:7px}
+    .cat-layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:18px;align-items:start}
+    .cat-form{display:flex;flex-direction:column;gap:13px}
+    .cat-form label{font-size:12px;font-weight:700;color:var(--ink)}
+    .cat-form input,.cat-form select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);font:inherit;outline:none}
+    .cat-form input:focus,.cat-form select:focus{border-color:var(--sage)}
+    .cat-color{height:43px!important;padding:4px!important;cursor:pointer}
+    .cat-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .cat-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+    .cat-toolbar input{flex:1;min-width:160px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;outline:none}
+    .cat-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .cat-item{border:1px solid var(--line);border-radius:15px;padding:15px;background:white;min-width:0}
+    .cat-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+    .cat-name{display:flex;align-items:center;gap:9px;min-width:0}
+    .cat-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+    .cat-name strong{font-size:14px;overflow-wrap:anywhere}
+    .cat-count{font-size:11px;color:var(--mut);margin-top:10px}
+    .cat-progress{height:7px;background:#edf0eb;border-radius:20px;overflow:hidden;margin-top:9px}
+    .cat-progress div{height:100%;border-radius:20px}
+    .cat-item-actions{display:flex;gap:6px;margin-top:13px}
+    .cat-item-actions button{border:1px solid var(--line);background:white;border-radius:8px;padding:7px 10px;font-size:11px;cursor:pointer}
+    .cat-item-actions button:hover{background:var(--sage-light)}
+    .cat-item-actions .hapus{color:#b5533c}
+    .cat-empty{grid-column:1/-1;text-align:center;padding:35px 10px;color:var(--mut);border:1px dashed var(--line);border-radius:14px}
+    .cat-message{font-size:12px;min-height:16px;color:var(--dark)}
+    .cat-modal{display:none;position:fixed;inset:0;background:#17251dcc;z-index:1000;align-items:center;justify-content:center;padding:16px}
+    .cat-modal.show{display:flex}
+    .cat-modal-box{background:white;width:100%;max-width:400px;border-radius:18px;padding:23px}
+    .cat-modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}
+    @media(max-width:850px){.cat-layout{grid-template-columns:1fr}.cat-stats{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:520px){.cat-list{grid-template-columns:1fr}.cat-hero{padding:18px}.cat-stats{gap:8px}.cat-stat{padding:12px}.cat-stat strong{font-size:20px}}
+  </style>
+</head>
+
+<body>
+
+<input type="checkbox" id="nt">
+
+<div id="app">
+  <aside id="side">
+    <h2>Study Planner</h2>
+    <nav id="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="tasks.html">My Tasks</a>
+      <a href="planner.html">Study Planner</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="categories.html" class="on">Categories</a>
+      <a href="statistics.html">Statistics</a>
+      <a href="settings.html">Settings</a>
+      <a href="#" class="out" onclick="bukaLogout();return false;">Logout</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header>
+      <a href="index.html" class="btn ghost" style="text-decoration:none">Menu</a>
+      <div>
+        <h1>Categories</h1>
+        <small id="tanggalHariIni"></small>
+      </div>
+      <a href="tasks.html" class="btn ghost" style="text-decoration:none">My Tasks</a>
+    </header>
+
+    <section class="cat-hero">
+      <h2>Organize your learning.</h2>
+      <p>Kelompokkan tugas berdasarkan kategori agar kegiatan belajarmu lebih teratur.</p>
+    </section>
+
+    <section class="cat-stats">
+      <div class="cat-stat">
+        <small>Total kategori</small>
+        <strong id="cKat">0</strong>
+      </div>
+      <div class="cat-stat">
+        <small>Total tugas</small>
+        <strong id="cTugas">0</strong>
+      </div>
+      <div class="cat-stat">
+        <small>Kategori teraktif</small>
+        <strong id="cTop" style="font-size:16px">-</strong>
+      </div>
+      <div class="cat-stat">
+        <small>Kategori kosong</small>
+        <strong id="cKosong">0</strong>
+      </div>
+    </section>
+
+    <div class="cat-layout">
+      <section class="card">
+        <h2 id="judulForm">Buat kategori</h2>
+        <p class="mut">Tambahkan kategori untuk mengatur tugasmu.</p>
+
+        <form id="formTambah" class="cat-form">
+          <input type="hidden" id="editIndex" value="-1">
+
+          <div>
+            <label for="namaBaru">Nama kategori</label>
+            <input id="namaBaru" type="text" placeholder="Contoh: Tugas Matematika" maxlength="40" required>
+          </div>
+
+          <div>
+            <label for="warnaBaru">Warna kategori</label>
+            <input id="warnaBaru" class="cat-color" type="color" value="#A8B99A">
+          </div>
+
+          <button class="btn primary" type="submit" id="btnSimpan">+ Tambah Kategori</button>
+          <button class="btn ghost" type="button" id="btnBatal" style="display:none">Batal Edit</button>
+          <p class="cat-message" id="msg"></p>
+        </form>
+
+        <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+
+        <h3>Tips kategori</h3>
+        <p class="mut" style="font-size:12px;line-height:1.7">
+          Gunakan kategori yang jelas agar kamu lebih mudah mengelompokkan tugas sekolah, project, ujian, dan kegiatan belajar mandiri.
+        </p>
+      </section>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <div>
+            <h2>Daftar Kategori</h2>
+            <p class="mut">Kelola semua kategori tugasmu.</p>
+          </div>
+          <button class="btn ghost" type="button" id="btnReset">Reset Default</button>
+        </div>
+
+        <div class="cat-toolbar">
+          <input type="search" id="cari" placeholder="Cari kategori...">
+        </div>
+
+        <div class="cat-list" id="daftar"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="cat-modal" id="logoutModal">
+  <div class="cat-modal-box" style="text-align:center">
+    <h2>Keluar dari akun?</h2>
+    <p class="mut">Apakah kamu yakin ingin keluar dari Study Planner?</p>
+    <div class="cat-modal-actions">
+      <button class="btn ghost" onclick="tutupLogout()">Batal</button>
+      <button class="btn del" onclick="logoutUser()">Ya, Logout</button>
+    </div>
+  </div>
+</div>
+
+<div class="cat-modal" id="hapusModal">
+  <div class="cat-modal-box">
+    <h2>Hapus kategori?</h2>
+    <p id="hapusPesan" class="mut">Kategori akan dihapus.</p>
+    <div class="cat-modal-actions">
+      <button class="btn ghost" id="batalHapus">Batal</button>
+      <button class="btn del" id="konfirmasiHapus">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+requireLogin();
+
+const KEY_TASKS='studyPlannerTasks';
+const KEY_CATS='studyPlannerCategories';
+
+const defaultCats=[
+  {nama:'Tugas Sekolah',warna:'#A8B99A'},
+  {nama:'Belajar Mandiri',warna:'#80A9A0'},
+  {nama:'Project',warna:'#9A9BC7'},
+  {nama:'Pekerjaan',warna:'#D6AE58'},
+  {nama:'Ujian dan Persiapan',warna:'#D98E82'},
+  {nama:'Lainnya',warna:'#A5A5A5'}
+];
+
+let kategori=[];
+let tugas=[];
+let indexHapus=-1;
+
+function $(id){return document.getElementById(id)}
+
+function esc(s){
+  return String(s??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+function baca(key){
+  try{
+    const data=JSON.parse(localStorage.getItem(key)||'[]');
+    return Array.isArray(data)?data:[];
+  }catch(e){return []}
+}
+
+function simpanKategori(){
+  localStorage.setItem(KEY_CATS,JSON.stringify(kategori));
+}
+
+function muat(){
+  kategori=baca(KEY_CATS);
+  tugas=baca(KEY_TASKS);
+
+  if(!kategori.length){
+    kategori=defaultCats.map(k=>({...k}));
+  }
+
+  // Pastikan kategori yang dipakai tugas tetap tersedia.
+  tugas.forEach(t=>{
+    const nama=t.kategori||'Lainnya';
+    if(!kategori.some(k=>k.nama.toLowerCase()===nama.toLowerCase())){
+      kategori.push({nama,warna:'#A8B99A'});
+    }
+  });
+
+  if(!kategori.some(k=>k.nama==='Lainnya')){
+    kategori.push({nama:'Lainnya',warna:'#A5A5A5'});
+  }
+
+  simpanKategori();
+  render();
+}
+
+function render(){
+  const cari=$('cari').value.trim().toLowerCase();
+  const jumlah=kategori.map(k=>({
+    ...k,
+    total:tugas.filter(t=>(t.kategori||'Lainnya')===k.nama).length,
+    selesai:tugas.filter(t=>(t.kategori||'Lainnya')===k.nama&&t.status==='Completed').length
+  }));
+
+  $('cKat').textContent=kategori.length;
+  $('cTugas').textContent=tugas.length;
+  $('cKosong').textContent=jumlah.filter(k=>k.total===0).length;
+
+  const top=[...jumlah].sort((a,b)=>b.total-a.total)[0];
+  $('cTop').textContent=top&&top.total?top.nama:'-';
+
+  const hasil=jumlah.filter(k=>k.nama.toLowerCase().includes(cari));
+
+  if(!hasil.length){
+    $('daftar').innerHTML='<div class="cat-empty">Kategori tidak ditemukan.</div>';
+    return;
+  }
+
+  $('daftar').innerHTML=hasil.map(k=>{
+    const persen=k.total?Math.round(k.selesai/k.total*100):0;
+    const index=kategori.findIndex(x=>x.nama===k.nama);
+
+    return `
+      <article class="cat-item">
+        <div class="cat-item-top">
+          <div class="cat-name">
+            <span class="cat-dot" style="background:${esc(k.warna)}"></span>
+            <strong>${esc(k.nama)}</strong>
+          </div>
+          <small class="mut">${k.total} tugas</small>
+        </div>
+
+        <div class="cat-count">${k.selesai} selesai · ${k.total-k.selesai} belum selesai</div>
+        <div class="cat-progress">
+          <div style="width:${persen}%;background:${esc(k.warna)}"></div>
+        </div>
+        <small class="mut">${persen}% selesai</small>
+
+        <div class="cat-item-actions">
+          <button type="button" data-edit="${index}">Edit</button>
+          <button type="button" class="hapus" data-delete="${index}" ${k.nama==='Lainnya'?'disabled':''}>Hapus</button>
+        </div>
+      </article>`;
+  }).join('');
+}
+
+function resetForm(){
+  $('formTambah').reset();
+  $('editIndex').value=-1;
+  $('warnaBaru').value='#A8B99A';
+  $('judulForm').textContent='Buat kategori';
+  $('btnSimpan').textContent='+ Tambah Kategori';
+  $('btnBatal').style.display='none';
+}
+
+function editKategori(index){
+  const k=kategori[index];
+  if(!k)return;
+
+  $('editIndex').value=index;
+  $('namaBaru').value=k.nama;
+  $('warnaBaru').value=k.warna||'#A8B99A';
+  $('judulForm').textContent='Edit kategori';
+  $('btnSimpan').textContent='Simpan Perubahan';
+  $('btnBatal').style.display='block';
+  $('msg').textContent='';
+
+  $('namaBaru').focus();
+}
+
+$('formTambah').addEventListener('submit',function(e){
+  e.preventDefault();
+
+  const nama=$('namaBaru').value.trim();
+  const warna=$('warnaBaru').value;
+  const index=Number($('editIndex').value);
+
+  if(!nama){
+    $('msg').textContent='Nama kategori tidak boleh kosong.';
+    return;
+  }
+
+  const duplikat=kategori.some((k,i)=>
+    k.nama.toLowerCase()===nama.toLowerCase()&&i!==index
+  );
+
+  if(duplikat){
+    $('msg').textContent='Kategori tersebut sudah tersedia.';
+    return;
+  }
+
+  if(index>=0&&kategori[index]){
+    const namaLama=kategori[index].nama;
+    kategori[index]={nama,warna};
+
+    tugas.forEach(t=>{
+      if(t.kategori===namaLama)t.kategori=nama;
+    });
+
+    localStorage.setItem(KEY_TASKS,JSON.stringify(tugas));
+    $('msg').textContent='Kategori berhasil diperbarui.';
+  }else{
+    kategori.push({nama,warna});
+    $('msg').textContent='Kategori berhasil ditambahkan.';
+  }
+
+  simpanKategori();
+  resetForm();
+  render();
+});
+
+$('btnBatal').addEventListener('click',function(){
+  resetForm();
+  $('msg').textContent='';
+});
+
+$('cari').addEventListener('input',render);
+
+$('daftar').addEventListener('click',function(e){
+  const edit=e.target.closest('[data-edit]');
+  const hapus=e.target.closest('[data-delete]');
+
+  if(edit){
+    editKategori(Number(edit.dataset.edit));
+  }
+
+  if(hapus){
+    const index=Number(hapus.dataset.delete);
+    const k=kategori[index];
+    if(!k)return;
+
+    indexHapus=index;
+    $('hapusPesan').textContent=
+      'Kategori "'+k.nama+'" akan dihapus. Tugas yang menggunakan kategori ini akan dipindahkan ke Lainnya.';
+    $('hapusModal').classList.add('show');
+  }
+});
+
+$('batalHapus').addEventListener('click',function(){
+  indexHapus=-1;
+  $('hapusModal').classList.remove('show');
+});
+
+$('konfirmasiHapus').addEventListener('click',function(){
+  if(indexHapus<0||!kategori[indexHapus])return;
+
+  const nama=kategori[indexHapus].nama;
+  tugas.forEach(t=>{
+    if(t.kategori===nama)t.kategori='Lainnya';
+  });
+
+  kategori.splice(indexHapus,1);
+  localStorage.setItem(KEY_TASKS,JSON.stringify(tugas));
+  simpanKategori();
+
+  indexHapus=-1;
+  $('hapusModal').classList.remove('show');
+  resetForm();
+  render();
+});
+
+$('btnReset').addEventListener('click',function(){
+  if(!confirm('Kembalikan daftar kategori ke kategori bawaan?'))return;
+
+  kategori=defaultCats.map(k=>({...k}));
+
+  tugas.forEach(t=>{
+    const nama=t.kategori||'Lainnya';
+    if(!kategori.some(k=>k.nama.toLowerCase()===nama.toLowerCase())){
+      kategori.push({nama,warna:'#A8B99A'});
+    }
+  });
+
+  simpanKategori();
+  resetForm();
+  render();
+  $('msg').textContent='Kategori bawaan berhasil dipulihkan.';
+});
+
+function bukaLogout(){
+  $('logoutModal').classList.add('show');
+}
+
+function tutupLogout(){
+  $('logoutModal').classList.remove('show');
+}
+
+$('logoutModal').addEventListener('click',function(e){
+  if(e.target===$('logoutModal'))tutupLogout();
+});
+
+$('hapusModal').addEventListener('click',function(e){
+  if(e.target===$('hapusModal')){
+    $('hapusModal').classList.remove('show');
+    indexHapus=-1;
+  }
+});
+
+$('tanggalHariIni').textContent=new Date().toLocaleDateString('id-ID',{
+  weekday:'long',day:'numeric',month:'long',year:'numeric'
+});
+
+window.addEventListener('storage',function(e){
+  if(e.key===KEY_TASKS||e.key===KEY_CATS)muat();
+});
+
+muat();
+</script>
+
+</body>
+</html>

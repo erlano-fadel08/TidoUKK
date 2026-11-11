@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Tasks - Study Planner</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .task-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+    .task-heading h2{margin:0}
+    .task-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+    .task-summary .card{padding:16px}
+    .task-summary small{display:block;color:var(--mut)}
+    .task-summary strong{display:block;font-size:25px;color:var(--dark);margin-top:6px}
+    .task-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+    .task-toolbar input,.task-toolbar select{max-width:220px;margin:0}
+    .task-row{display:flex;align-items:center;gap:13px;padding:16px 0;border-bottom:1px solid var(--line)}
+    .task-row:last-child{border-bottom:0}
+    .task-check{width:19px;height:19px;accent-color:var(--dark);flex-shrink:0}
+    .task-main{flex:1;min-width:0}
+    .task-main strong{display:block;font-size:14px;overflow-wrap:anywhere}
+    .task-main small{display:block;color:var(--mut);font-size:12px;margin-top:5px}
+    .task-main.completed strong{text-decoration:line-through;color:var(--mut)}
+    .task-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .task-tag{font-size:10px;padding:4px 8px;border-radius:20px;background:var(--sage-light);color:var(--dark)}
+    .task-actions{display:flex;gap:6px;flex-wrap:wrap}
+    .task-actions button{border:1px solid var(--line);background:white;border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer}
+    .task-actions button:hover{background:var(--sage-light)}
+    .task-actions .danger{color:var(--red)}
+    .task-empty{text-align:center;padding:40px 15px;color:var(--mut)}
+    .task-empty strong{display:block;color:var(--ink);margin-bottom:6px}
+    .task-modal{display:none;position:fixed;inset:0;background:#17251dcc;z-index:1000;align-items:center;justify-content:center;padding:16px}
+    .task-modal.show{display:flex}
+    .task-modal-box{width:100%;max-width:500px;max-height:90vh;overflow:auto;background:white;border-radius:18px;padding:24px}
+    .task-modal-box h2{margin-top:0}
+    .task-modal-box label{display:block;font-size:13px;font-weight:600;margin:12px 0 6px}
+    .task-modal-box input,.task-modal-box select,.task-modal-box textarea{width:100%;box-sizing:border-box}
+    .task-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .task-modal-actions{display:flex;gap:9px;margin-top:18px}
+    .task-modal-actions button{flex:1}
+    .detail-line{padding:10px 0;border-bottom:1px solid var(--line)}
+    .detail-line:last-child{border-bottom:0}
+    .detail-line small{display:block;color:var(--mut);margin-bottom:4px}
+    @media(max-width:600px){
+      .task-summary{gap:7px}
+      .task-summary .card{padding:11px}
+      .task-summary strong{font-size:20px}
+      .task-row{flex-wrap:wrap}
+      .task-actions{width:100%;padding-left:32px}
+      .task-toolbar input,.task-toolbar select{max-width:none;flex:1}
+      .task-form-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+
+<input type="checkbox" id="nt">
+
+<div id="app">
+
+  <aside id="side">
+    <h2>Study Planner</h2>
+
+    <nav id="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="tasks.html" class="on">My Tasks</a>
+      <a href="planner.html">Study Planner</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="categories.html">Categories</a>
+      <a href="statistics.html">Statistics</a>
+      <a href="settings.html">Settings</a>
+      <a href="#" class="out" onclick="bukaLogout();return false;">Logout</a>
+    </nav>
+  </aside>
+
+  <main>
+
+    <header>
+      <a href="index.html" class="btn ghost" style="text-decoration:none">Menu</a>
+      <div>
+        <h1>My Tasks</h1>
+        <small id="tanggalHariIni"></small>
+      </div>
+      <a class="btn ghost" href="index.html#notif">
+        Notifikasi <b id="badge">0</b>
+      </a>
+    </header>
+
+    <section class="card">
+      <div class="task-heading">
+        <div>
+          <h2>Daftar Tugas</h2>
+          <p class="mut">Kelola semua pekerjaan dan tugas belajarmu.</p>
+        </div>
+        <button class="btn" type="button" onclick="bukaForm()">+ Tambah Tugas</button>
+      </div>
+
+      <div class="task-summary">
+        <div class="card">
+          <small>Total Tugas</small>
+          <strong id="ringkasTotal">0</strong>
+        </div>
+        <div class="card">
+          <small>Belum Selesai</small>
+          <strong id="ringkasBelum">0</strong>
+        </div>
+        <div class="card">
+          <small>Selesai</small>
+          <strong id="ringkasSelesai">0</strong>
+        </div>
+      </div>
+
+      <div class="task-toolbar">
+        <input type="search" id="cariTugas" placeholder="Cari tugas...">
+        <select id="filterStatus">
+          <option value="">Semua status</option>
+          <option value="To Do">To Do</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+        </select>
+        <select id="filterPrioritas">
+          <option value="">Semua prioritas</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+
+      <div id="taskList">
+        <div class="task-empty">
+          <strong>Memuat tugas...</strong>
+          Silakan tunggu sebentar.
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- FORM TAMBAH / EDIT -->
+<div class="task-modal" id="form">
+  <div class="task-modal-box">
+    <h2 id="judulForm">Tambah Tugas</h2>
+    <p class="mut">Lengkapi informasi tugasmu.</p>
+
+    <form id="taskForm">
+      <input type="hidden" id="taskIndex">
+
+      <label for="namaTugas">Nama tugas</label>
+      <input type="text" id="namaTugas" placeholder="Contoh: Membuat laporan" required>
+
+      <label for="deskripsiTugas">Deskripsi</label>
+      <textarea id="deskripsiTugas" rows="3" placeholder="Deskripsi tugas..."></textarea>
+
+      <label for="kategoriTugas">Kategori</label>
+      <input type="text" id="kategoriTugas" list="daftarKategori" placeholder="Pilih atau tulis kategori" required>
+      <datalist id="daftarKategori">
+        <option value="Tugas Sekolah">
+        <option value="Belajar Mandiri">
+        <option value="Project">
+        <option value="Pekerjaan">
+        <option value="Ujian dan Persiapan">
+        <option value="Lainnya">
+      </datalist>
+
+      <div class="task-form-grid">
+        <div>
+          <label for="deadlineTugas">Deadline</label>
+          <input type="date" id="deadlineTugas">
+        </div>
+        <div>
+          <label for="jamTugas">Jam</label>
+          <input type="time" id="jamTugas">
+        </div>
+      </div>
+
+      <div class="task-form-grid">
+        <div>
+          <label for="prioritasTugas">Prioritas</label>
+          <select id="prioritasTugas">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+        <div>
+          <label for="statusTugas">Status</label>
+          <select id="statusTugas">
+            <option value="To Do">To Do</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="task-modal-actions">
+        <button class="btn" type="submit">Simpan Tugas</button>
+        <button class="btn ghost" type="button" onclick="tutupForm()">Batal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- DETAIL TUGAS -->
+<div class="task-modal" id="detail">
+  <div class="task-modal-box">
+    <h2>Detail Tugas</h2>
+    <div id="detailIsi"></div>
+    <div class="task-modal-actions">
+      <button class="btn ghost" type="button" onclick="tutupDetail()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- KONFIRMASI LOGOUT -->
+<div class="task-modal" id="logoutModal">
+  <div class="task-modal-box" style="max-width:360px;text-align:center">
+    <div class="logout-icon">↗</div>
+    <h2>Keluar dari akun?</h2>
+    <p class="mut">Kamu yakin ingin mengakhiri sesi Study Planner?</p>
+    <div class="task-modal-actions">
+      <button class="btn ghost" type="button" onclick="tutupLogout()">Batal</button>
+      <button class="btn del" type="button" onclick="logoutUser()">Ya, Logout</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script src="tasks.js"></script>
+
+<script>
+requireLogin();
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function bukaLogout(){
+  $('logoutModal').classList.add('show');
+}
+
+function tutupLogout(){
+  $('logoutModal').classList.remove('show');
+}
+
+$('logoutModal').addEventListener('click',function(e){
+  if(e.target===$('logoutModal'))tutupLogout();
+});
+
+$('form').addEventListener('click',function(e){
+  if(e.target===$('form'))tutupForm();
+});
+
+$('detail').addEventListener('click',function(e){
+  if(e.target===$('detail'))tutupDetail();
+});
+
+$('tanggalHariIni').textContent=new Date().toLocaleDateString('id-ID',{
+  weekday:'long',
+  day:'numeric',
+  month:'long',
+  year:'numeric'
+});
+</script>
+
+</body>
+</html>

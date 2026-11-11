@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings - Study Planner</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .settings-hero{
+      padding:24px;
+      border-radius:18px;
+      background:linear-gradient(120deg,#263f32,#52765a);
+      color:white;
+      margin-bottom:20px;
+    }
+    .settings-hero p{color:#dce8dc;margin-bottom:0}
+    .settings-layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:17px;align-items:start}
+    .settings-menu{position:sticky;top:20px}
+    .settings-menu a{display:block;padding:12px 13px;border-radius:10px;color:var(--ink);text-decoration:none;font-size:13px;margin-bottom:5px}
+    .settings-menu a:hover{background:var(--sage-light);color:var(--dark)}
+    .settings-section{margin-bottom:17px;scroll-margin-top:20px}
+    .settings-section h2{font-size:17px;margin-bottom:5px}
+    .settings-section>p{font-size:12px;color:var(--mut);margin-bottom:20px}
+    .settings-form{display:flex;flex-direction:column;gap:14px;max-width:550px}
+    .settings-field label{display:block;font-size:12px;font-weight:700;margin-bottom:7px}
+    .settings-field input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);font:inherit;outline:none}
+    .settings-field input:focus{border-color:var(--sage)}
+    .settings-message{font-size:12px;min-height:16px;color:var(--dark)}
+    .settings-profile{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+    .settings-avatar{width:55px;height:55px;display:grid;place-items:center;border-radius:16px;background:var(--sage-light);color:var(--dark);font-size:23px;font-weight:800}
+    .settings-profile strong{display:block}
+    .settings-profile small{color:var(--mut)}
+    .settings-danger{border:1px solid #efd9d5;background:#fffafa}
+    .settings-danger h2{color:#a8473b}
+    .settings-danger .btn{margin-top:8px}
+    .settings-actions{display:flex;gap:9px;flex-wrap:wrap}
+    .settings-note{font-size:11px;color:var(--mut);line-height:1.7;margin-top:10px}
+    .settings-modal{display:none;position:fixed;inset:0;background:#17251dcc;z-index:1000;align-items:center;justify-content:center;padding:16px}
+    .settings-modal.show{display:flex}
+    .settings-modal-box{background:white;width:100%;max-width:390px;border-radius:18px;padding:23px}
+    .settings-modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}
+    @media(max-width:750px){
+      .settings-layout{grid-template-columns:1fr}
+      .settings-menu{position:static;display:flex;gap:5px;overflow-x:auto;white-space:nowrap}
+      .settings-menu a{flex-shrink:0}
+    }
+    @media(max-width:500px){
+      .settings-hero{padding:18px}
+      .settings-profile{align-items:flex-start}
+    }
+  </style>
+</head>
+
+<body>
+<input type="checkbox" id="nt">
+
+<div id="app">
+  <aside id="side">
+    <h2>Study Planner</h2>
+    <nav id="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="tasks.html">My Tasks</a>
+      <a href="planner.html">Study Planner</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="categories.html">Categories</a>
+      <a href="statistics.html">Statistics</a>
+      <a href="settings.html" class="on">Settings</a>
+      <a href="#" class="out" onclick="bukaLogout();return false;">Logout</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header>
+      <a href="index.html" class="btn ghost" style="text-decoration:none">Menu</a>
+      <div>
+        <h1>Settings</h1>
+        <small id="tanggalHariIni"></small>
+      </div>
+      <a href="index.html" class="btn ghost" style="text-decoration:none">Dashboard</a>
+    </header>
+
+    <section class="settings-hero">
+      <h2>Account Settings</h2>
+      <p>Kelola informasi akun, keamanan, dan data Study Planner kamu.</p>
+    </section>
+
+    <div class="settings-layout">
+
+      <section class="card settings-menu">
+        <h3 style="font-size:14px;margin-bottom:12px">Pengaturan</h3>
+        <a href="#profil">01. Profil Saya</a>
+        <a href="#keamanan">02. Keamanan</a>
+        <a href="#data">03. Data & Backup</a>
+        <a href="#akun">04. Akun</a>
+      </section>
+
+      <div>
+
+        <section class="card settings-section" id="profil">
+          <h2>Profil Saya</h2>
+          <p>Perbarui informasi pribadi akunmu.</p>
+
+          <div class="settings-profile">
+            <div class="settings-avatar" id="avatar">U</div>
+            <div>
+              <strong id="namaTampilan">Pengguna</strong>
+              <small id="emailTampilan">email@example.com</small>
+            </div>
+          </div>
+
+          <form id="formProfil" class="settings-form">
+            <div class="settings-field">
+              <label for="pNama">Nama Lengkap</label>
+              <input type="text" id="pNama" required maxlength="60" placeholder="Masukkan nama">
+            </div>
+
+            <div class="settings-field">
+              <label for="pEmail">Alamat Email</label>
+              <input type="email" id="pEmail" required placeholder="nama@email.com">
+            </div>
+
+            <button class="btn primary" type="submit">Simpan Perubahan</button>
+            <div class="settings-message" id="msgProfil"></div>
+          </form>
+        </section>
+
+        <section class="card settings-section" id="keamanan">
+          <h2>Keamanan Akun</h2>
+          <p>Ganti password untuk menjaga keamanan akunmu.</p>
+
+          <form id="formPass" class="settings-form">
+            <div class="settings-field">
+              <label for="passLama">Password Saat Ini</label>
+              <input type="password" id="passLama" required placeholder="Masukkan password lama">
+            </div>
+
+            <div class="settings-field">
+              <label for="passBaru">Password Baru</label>
+              <input type="password" id="passBaru" required minlength="6" placeholder="Minimal 6 karakter">
+            </div>
+
+            <div class="settings-field">
+              <label for="passUlang">Konfirmasi Password Baru</label>
+              <input type="password" id="passUlang" required minlength="6" placeholder="Ulangi password baru">
+            </div>
+
+            <button class="btn primary" type="submit">Ubah Password</button>
+            <div class="settings-message" id="msgPass"></div>
+          </form>
+        </section>
+
+        <section class="card settings-section" id="data">
+          <h2>Data & Backup</h2>
+          <p>Kelola penyimpanan data Study Planner kamu.</p>
+
+          <div style="padding:15px;background:var(--sage-light);border-radius:12px;margin-bottom:17px">
+            <strong style="font-size:13px;color:var(--dark)">Backup Data</strong>
+            <p class="settings-note">Simpan salinan tugas, kategori, dan jadwal belajar dalam file JSON.</p>
+            <button class="btn primary" type="button" id="btnBackup">Download Backup</button>
+          </div>
+
+          <div class="settings-danger" style="padding:16px;border-radius:12px">
+            <strong style="font-size:13px">Hapus Seluruh Tugas</strong>
+            <p class="settings-note">Semua data tugas akan dihapus secara permanen dari penyimpanan browser ini.</p>
+            <button class="btn del" type="button" id="btnHapusTugas">Hapus Semua Tugas</button>
+          </div>
+
+          <div class="settings-message" id="msgData" style="margin-top:12px"></div>
+        </section>
+
+        <section class="card settings-section" id="akun">
+          <h2>Pengaturan Akun</h2>
+          <p>Kelola sesi dan akun Study Planner kamu.</p>
+
+          <div class="settings-actions">
+            <button class="btn ghost" type="button" id="btnKeluar">Logout</button>
+            <button class="btn del" type="button" id="btnHapusAkun">Hapus Akun</button>
+          </div>
+
+          <p class="settings-note">
+            Menghapus akun akan menghilangkan informasi akun dari browser ini.
+            Tindakan ini tidak dapat dibatalkan.
+          </p>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="settings-modal" id="logoutModal">
+  <div class="settings-modal-box" style="text-align:center">
+    <h2>Keluar dari akun?</h2>
+    <p class="mut">Apakah kamu yakin ingin keluar dari Study Planner?</p>
+    <div class="settings-modal-actions">
+      <button class="btn ghost" onclick="tutupLogout()">Batal</button>
+      <button class="btn del" onclick="logoutUser()">Ya, Logout</button>
+    </div>
+  </div>
+</div>
+
+<div class="settings-modal" id="hapusAkunModal">
+  <div class="settings-modal-box">
+    <h2>Hapus Akun?</h2>
+    <p class="mut">Akun dan seluruh data lokal milik akun ini akan dihapus dari browser. Tindakan ini tidak bisa dibatalkan.</p>
+    <div class="settings-modal-actions">
+      <button class="btn ghost" onclick="tutupHapusAkun()">Batal</button>
+      <button class="btn del" id="konfirmasiHapusAkun">Ya, Hapus</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+requireLogin();
+
+const KEY_TASKS='studyPlannerTasks';
+const KEY_CATS='studyPlannerCategories';
+const KEY_SCHEDULE='studyPlannerSchedule';
+
+function $(id){return document.getElementById(id)}
+
+function baca(key){
+  try{
+    return JSON.parse(localStorage.getItem(key)||'[]');
+  }catch(e){return []}
+}
+
+function getCurrentUser(){
+  try{
+    return JSON.parse(localStorage.getItem('currentUser'));
+  }catch(e){return null}
+}
+
+function tampilkanProfil(){
+  const user=getCurrentUser();
+  if(!user)return;
+
+  $('pNama').value=user.nama||'';
+  $('pEmail').value=user.email||'';
+  $('namaTampilan').textContent=user.nama||'Pengguna';
+  $('emailTampilan').textContent=user.email||'';
+  $('avatar').textContent=(user.nama||'U').charAt(0).toUpperCase();
+}
+
+$('formProfil').addEventListener('submit',function(e){
+  e.preventDefault();
+
+  const user=getCurrentUser();
+  if(!user)return;
+
+  const nama=$('pNama').value.trim();
+  const email=$('pEmail').value.trim().toLowerCase();
+
+  if(!nama||!email){
+    $('msgProfil').textContent='Nama dan email wajib diisi.';
+    return;
+  }
+
+  const users=baca('users');
+  const index=users.findIndex(u=>u.email===user.email);
+
+  if(index<0){
+    $('msgProfil').textContent='Data akun tidak ditemukan.';
+    return;
+  }
+
+  if(users.some((u,i)=>i!==index&&u.email.toLowerCase()===email)){
+    $('msgProfil').textContent='Email sudah digunakan akun lain.';
+    return;
+  }
+
+  users[index].nama=nama;
+  users[index].email=email;
+
+  localStorage.setItem('users',JSON.stringify(users));
+  localStorage.setItem('currentUser',JSON.stringify({nama,email}));
+
+  tampilkanProfil();
+  $('msgProfil').textContent='Profil berhasil diperbarui.';
+});
+
+$('formPass').addEventListener('submit',async function(e){
+  e.preventDefault();
+
+  const user=getCurrentUser();
+  if(!user)return;
+
+  const lama=$('passLama').value;
+  const baru=$('passBaru').value;
+  const ulang=$('passUlang').value;
+
+  if(baru.length<6){
+    $('msgPass').textContent='Password baru minimal 6 karakter.';
+    return;
+  }
+
+  if(baru!==ulang){
+    $('msgPass').textContent='Konfirmasi password tidak cocok.';
+    return;
+  }
+
+  if(lama===baru){
+    $('msgPass').textContent='Password baru harus berbeda.';
+    return;
+  }
+
+  const users=baca('users');
+  const index=users.findIndex(u=>u.email===user.email);
+
+  if(index<0){
+    $('msgPass').textContent='Akun tidak ditemukan.';
+    return;
+  }
+
+  const hashLama=await hashPassword(lama);
+
+  if(users[index].password!==hashLama){
+    $('msgPass').textContent='Password saat ini salah.';
+    return;
+  }
+
+  users[index].password=await hashPassword(baru);
+  localStorage.setItem('users',JSON.stringify(users));
+
+  $('formPass').reset();
+  $('msgPass').textContent='Password berhasil diperbarui.';
+});
+
+$('btnBackup').addEventListener('click',function(){
+  const data={
+    tanggalBackup:new Date().toISOString(),
+    user:getCurrentUser(),
+    tugas:baca(KEY_TASKS),
+    kategori:baca(KEY_CATS),
+    jadwal:baca(KEY_SCHEDULE)
+  };
+
+  const blob=new Blob([JSON.stringify(data,null,2)],{
+    type:'application/json'
+  });
+
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='study-planner-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  $('msgData').textContent='Backup berhasil dibuat.';
+});
+
+$('btnHapusTugas').addEventListener('click',function(){
+  if(!confirm('Yakin ingin menghapus seluruh tugas?'))return;
+
+  localStorage.removeItem(KEY_TASKS);
+  $('msgData').textContent='Seluruh tugas berhasil dihapus.';
+});
+
+function bukaLogout(){
+  $('logoutModal').classList.add('show');
+}
+
+function tutupLogout(){
+  $('logoutModal').classList.remove('show');
+}
+
+$('btnKeluar').addEventListener('click',bukaLogout);
+
+$('logoutModal').addEventListener('click',function(e){
+  if(e.target===$('logoutModal'))tutupLogout();
+});
+
+function bukaHapusAkun(){
+  $('hapusAkunModal').classList.add('show');
+}
+
+function tutupHapusAkun(){
+  $('hapusAkunModal').classList.remove('show');
+}
+
+$('btnHapusAkun').addEventListener('click',bukaHapusAkun);
+
+$('hapusAkunModal').addEventListener('click',function(e){
+  if(e.target===$('hapusAkunModal'))tutupHapusAkun();
+});
+
+$('konfirmasiHapusAkun').addEventListener('click',function(){
+  const user=getCurrentUser();
+  if(!user)return;
+
+  const users=baca('users').filter(u=>u.email!==user.email);
+  localStorage.setItem('users',JSON.stringify(users));
+
+  localStorage.removeItem('currentUser');
+  localStorage.removeItem(KEY_TASKS);
+  localStorage.removeItem(KEY_CATS);
+  localStorage.removeItem(KEY_SCHEDULE);
+
+  window.location.href='register.html';
+});
+
+$('tanggalHariIni').textContent=new Date().toLocaleDateString('id-ID',{
+  weekday:'long',day:'numeric',month:'long',year:'numeric'
+});
+
+tampilkanProfil();
+</script>
+
+</body>
+</html>

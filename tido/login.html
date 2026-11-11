@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Study Planner</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:#F5F7F2;
+      font-family:Inter,Poppins,system-ui,sans-serif;
+      color:#202B24;
+      display:grid;
+      place-items:center;
+      padding:25px;
+    }
+    .auth-wrap{
+      width:100%;
+      max-width:950px;
+      min-height:570px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      background:white;
+      border-radius:25px;
+      overflow:hidden;
+      box-shadow:0 20px 60px rgba(38,63,50,.10);
+    }
+    .auth-side{
+      padding:45px;
+      background:linear-gradient(145deg,#263F32,#52765A);
+      color:white;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      position:relative;
+      overflow:hidden;
+    }
+    .auth-side:before,.auth-side:after{
+      content:"";
+      position:absolute;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:50%;
+      width:280px;
+      height:280px;
+      right:-100px;
+      bottom:-100px;
+    }
+    .auth-side:after{
+      width:190px;
+      height:190px;
+      right:-55px;
+      bottom:-55px;
+    }
+    .auth-brand{
+      font-size:20px;
+      font-weight:800;
+      letter-spacing:-.5px;
+      position:relative;
+      z-index:1;
+    }
+    .auth-side-content{
+      position:relative;
+      z-index:1;
+      max-width:360px;
+    }
+    .auth-side-content h1{
+      font-size:42px;
+      line-height:1.15;
+      letter-spacing:-1.5px;
+      margin:0 0 15px;
+    }
+    .auth-side-content p{
+      color:#DCE8DC;
+      font-size:14px;
+      line-height:1.8;
+    }
+    .auth-side-footer{
+      color:#DCE8DC;
+      font-size:11px;
+      position:relative;
+      z-index:1;
+    }
+    .auth-content{
+      padding:50px 45px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    .auth-content h2{
+      font-size:29px;
+      letter-spacing:-.8px;
+      margin:0 0 8px;
+      color:#263F32;
+    }
+    .auth-subtitle{
+      font-size:13px;
+      color:#7A877D;
+      margin:0 0 30px;
+    }
+    .auth-form{
+      display:flex;
+      flex-direction:column;
+      gap:17px;
+    }
+    .auth-field label{
+      display:block;
+      font-size:12px;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+    .auth-field input{
+      width:100%;
+      padding:14px;
+      border:1px solid #E5EAE2;
+      border-radius:11px;
+      outline:none;
+      background:#FAFBF9;
+      font:inherit;
+      font-size:13px;
+      transition:.2s;
+    }
+    .auth-field input:focus{
+      border-color:#8DA58A;
+      background:white;
+      box-shadow:0 0 0 3px rgba(168,185,154,.15);
+    }
+    .auth-submit{
+      border:0;
+      background:#263F32;
+      color:white;
+      padding:14px;
+      border-radius:11px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s;
+      margin-top:5px;
+    }
+    .auth-submit:hover{
+      background:#45694F;
+      transform:translateY(-2px);
+    }
+    .auth-message{
+      color:#B5533C;
+      font-size:12px;
+      min-height:16px;
+      line-height:1.5;
+    }
+    .auth-bottom{
+      font-size:12px;
+      color:#7A877D;
+      text-align:center;
+      margin-top:23px;
+    }
+    .auth-bottom a{
+      color:#345442;
+      font-weight:700;
+      text-decoration:none;
+    }
+    .auth-bottom a:hover{text-decoration:underline}
+    .auth-label{
+      display:inline-block;
+      background:#EAF0E5;
+      color:#345442;
+      font-size:10px;
+      font-weight:700;
+      padding:7px 11px;
+      border-radius:30px;
+      margin-bottom:18px;
+    }
+    @media(max-width:700px){
+      .auth-wrap{grid-template-columns:1fr;max-width:430px}
+      .auth-side{min-height:220px;padding:27px}
+      .auth-side-content h1{font-size:29px}
+      .auth-side-content p{font-size:12px}
+      .auth-side-footer{display:none}
+      .auth-content{padding:35px 27px}
+    }
+    @media(max-width:380px){
+      body{padding:12px}
+      .auth-content{padding:28px 20px}
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="auth-wrap">
+
+  <section class="auth-side">
+    <div class="auth-brand">Study Planner.</div>
+
+    <div class="auth-side-content">
+      <span class="auth-label">YOUR PERSONAL STUDY SPACE</span>
+      <h1>Make your day more productive.</h1>
+      <p>
+        Atur tugas, susun jadwal belajar, dan pantau perkembanganmu
+        dalam satu tempat.
+      </p>
+    </div>
+
+    <div class="auth-side-footer">
+      © 2026 Study Planner. Stay focused, keep growing.
+    </div>
+  </section>
+
+  <section class="auth-content">
+    <h2>Welcome back!</h2>
+    <p class="auth-subtitle">Masuk ke akunmu dan lanjutkan produktivitasmu.</p>
+
+    <form id="loginForm" class="auth-form">
+      <div class="auth-field">
+        <label for="email">Alamat Email</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="nama@email.com"
+          autocomplete="email"
+          required
+        >
+      </div>
+
+      <div class="auth-field">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Masukkan password"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <div class="auth-message" id="pesan"></div>
+
+      <button class="auth-submit" type="submit">Masuk ke Akun →</button>
+    </form>
+
+    <div class="auth-bottom">
+      Belum punya akun?
+      <a href="register.html">Daftar sekarang</a>
+    </div>
+  </section>
+
+</div>
+
+<script src="auth.js"></script>
+<script>
+if(localStorage.getItem('currentUser')){
+  window.location.href='index.html';
+}
+
+document.getElementById('loginForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value;
+  const pesan=document.getElementById('pesan');
+  const tombol=this.querySelector('button[type="submit"]');
+
+  pesan.textContent='';
+  tombol.disabled=true;
+  tombol.textContent='Memproses...';
+
+  try{
+    const hasil=await loginUser(email,password);
+
+    if(!hasil.ok){
+      pesan.textContent=hasil.pesan;
+      return;
+    }
+
+    window.location.href='index.html';
+  }catch(error){
+    pesan.textContent='Terjadi kesalahan. Silakan coba lagi.';
+  }finally{
+    tombol.disabled=false;
+    tombol.textContent='Masuk ke Akun →';
+  }
+});
+</script>
+
+</body>
+</html>

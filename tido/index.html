@@ -1,0 +1,445 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard - Study Planner</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* DASHBOARD */
+        .dashboard-welcome {
+            background: linear-gradient(120deg, #263F32, #456A50);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 22px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-welcome::after {
+            content: "";
+            position: absolute;
+            width: 190px;
+            height: 190px;
+            border: 35px solid rgba(255,255,255,0.07);
+            border-radius: 50%;
+            right: -45px;
+            top: -65px;
+        }
+
+        .dashboard-welcome h2 {
+            color: white;
+            font-size: 25px;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-welcome p {
+            color: #DCE9DC;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .dashboard-welcome small {
+            display: block;
+            color: #DCE9DC;
+            margin-top: 15px;
+        }
+
+        .dashboard-section {
+            margin-bottom: 20px;
+        }
+
+        .dashboard-section h3 {
+            font-size: 17px;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-section > p {
+            font-size: 13px;
+            color: var(--mut);
+            margin-bottom: 16px;
+        }
+
+        .dashboard-stats .card {
+            min-height: 125px;
+        }
+
+        .dashboard-stats .stat-icon {
+            width: 37px;
+            height: 37px;
+            border-radius: 11px;
+            background: var(--sage-light);
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 13px;
+        }
+
+        .dashboard-stats .card:nth-child(5) .stat-icon {
+            background: #F9E5E2;
+            color: var(--red);
+        }
+
+        .productivity-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .productivity-info {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .productivity-info h3 {
+            margin-bottom: 5px;
+        }
+
+        .productivity-info p {
+            margin: 0;
+            color: var(--mut);
+            font-size: 13px;
+        }
+
+        .productivity-bar {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .productivity-bar .prog {
+            margin-top: 10px;
+        }
+
+        .dashboard-task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .dashboard-task-header h3 {
+            margin: 0;
+        }
+
+        .dashboard-task-header a {
+            font-size: 12px;
+            color: var(--dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .dashboard-chart {
+            margin-bottom: 20px;
+        }
+
+        .dashboard-chart h3 {
+            margin-bottom: 5px;
+        }
+
+        .dashboard-chart p {
+            color: var(--mut);
+            font-size: 13px;
+        }
+
+        .dashboard-notif {
+            max-width: 480px;
+        }
+
+        .dashboard-notif .card {
+            border-radius: 20px;
+        }
+
+        .notif-content {
+            margin-top: 18px;
+        }
+
+        .notif-content p {
+            padding: 12px;
+            border-radius: 10px;
+            background: var(--bg);
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-notif .notif-close {
+            margin-top: 10px;
+        }
+
+        @media (min-width: 801px) {
+            header .menu-btn {
+                display: inline-block !important;
+                visibility: hidden;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .dashboard-welcome {
+                padding: 23px;
+            }
+
+            .dashboard-welcome h2 {
+                font-size: 21px;
+            }
+
+            .dashboard-stats .card {
+                min-height: 110px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<input type="checkbox" id="nt">
+
+<div id="app">
+
+    <!-- SIDEBAR -->
+    <aside id="side">
+        <h2>Study Planner</h2>
+
+        <nav id="nav">
+            <a href="index.html" class="on">Dashboard</a>
+            <a href="tasks.html">My Tasks</a>
+            <a href="planner.html">Study Planner</a>
+            <a href="calendar.html">Calendar</a>
+            <a href="categories.html">Categories</a>
+            <a href="statistics.html">Statistics</a>
+            <a href="settings.html">Settings</a>
+
+            <a href="#" class="out"
+               onclick="bukaLogout(); return false;">
+                Logout
+            </a>
+        </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main>
+
+        <!-- HEADER -->
+        <header>
+            <label for="nt" class="btn ghost menu-btn">☰ Menu</label>
+
+            <div>
+                <h1>Dashboard</h1>
+                <small id="tanggalHariIni">Study Planner Overview</small>
+            </div>
+
+            <a class="btn ghost" href="#notif">
+                ♢ Notifikasi <b id="badge">3</b>
+            </a>
+        </header>
+
+        <!-- WELCOME -->
+        <section class="dashboard-welcome">
+            <h2 id="salam">Selamat datang!</h2>
+
+            <p>
+                Selamat datang kembali di Study Planner.
+                Yuk, atur aktivitas belajarmu dan capai target hari ini!
+            </p>
+
+            <small id="tanggalWelcome">
+                Let's make today productive.
+            </small>
+        </section>
+
+        <!-- STATISTIK -->
+        <section class="dashboard-section">
+
+            <h3>Ringkasan Aktivitas</h3>
+            <p>Pantau perkembangan tugas belajarmu di sini.</p>
+
+            <div class="grid dashboard-stats">
+
+                <div class="card stat">
+                    <div class="stat-icon">▦</div>
+                    <small>Total tugas</small>
+                    <b id="totalTugas">0</b>
+                </div>
+
+                <div class="card stat">
+                    <div class="stat-icon">◷</div>
+                    <small>To Do</small>
+                    <b id="todoTugas">0</b>
+                </div>
+
+                <div class="card stat">
+                    <div class="stat-icon">↗</div>
+                    <small>In Progress</small>
+                    <b id="progressTugas">0</b>
+                </div>
+
+                <div class="card stat">
+                    <div class="stat-icon">✓</div>
+                    <small>Selesai</small>
+                    <b id="selesaiTugas">0</b>
+                </div>
+
+                <div class="card stat">
+                    <div class="stat-icon">!</div>
+                    <small>Mendekati deadline</small>
+                    <b id="deadlineTugasDashboard">0</b>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PRODUKTIVITAS -->
+        <section class="card dashboard-section productivity-card">
+
+            <div class="productivity-info">
+                <h3>Produktivitas Belajar</h3>
+
+                <p>
+                    Lihat seberapa banyak tugas yang berhasil
+                    kamu selesaikan.
+                </p>
+            </div>
+
+            <div class="productivity-bar">
+                <small id="labelProduktivitas">
+                    Produktivitas 0%
+                </small>
+
+                <div class="prog">
+                    <i id="barProduktivitas" style="width:0%"></i>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- DAFTAR TUGAS -->
+        <section class="card dashboard-section">
+
+            <div class="dashboard-task-header">
+                <div>
+                    <h3>Perlu Segera Diselesaikan</h3>
+                    <small>Prioritaskan tugas yang mendekati deadline.</small>
+                </div>
+
+                <a href="tasks.html">Lihat semua →</a>
+            </div>
+
+            <div id="dashboardTaskList">
+                <p>Memuat tugas...</p>
+            </div>
+
+        </section>
+
+        <!-- GRAFIK -->
+        <section class="card dashboard-section dashboard-chart">
+
+            <h3>Penyelesaian 7 Hari Terakhir</h3>
+
+            <p>
+                Grafik perkembangan tugas yang telah diselesaikan.
+            </p>
+
+            <div class="bars" id="grafikDashboard">
+                <div>0 <i style="height:3px"></i> -</div>
+                <div>0 <i style="height:3px"></i> -</div>
+                <div>0 <i style="height:3px"></i> -</div>
+                <div>0 <i style="height:3px"></i> -</div>
+                <div>0 <i style="height:3px"></i> -</div>
+                <div>0 <i style="height:3px"></i> -</div>
+                <div>0 <i style="height:3px"></i> -</div>
+            </div>
+
+        </section>
+
+        <!-- NOTIFIKASI -->
+        <div class="modal dashboard-notif" id="notif">
+
+            <div class="card">
+
+                <h3>♢ Notifikasi</h3>
+
+                <p class="mut">
+                    Informasi tugas dan deadline kamu.
+                </p>
+
+                <div class="notif-content" id="notifIsi">
+                    <p>Belum ada notifikasi.</p>
+                </div>
+
+                <a class="btn ghost notif-close" href="#">
+                    Tutup
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- LOGOUT -->
+        <div class="modal" id="logoutModal">
+
+            <div class="card logout-card">
+
+                <div class="logout-icon">↪</div>
+
+                <h3>Konfirmasi Logout</h3>
+
+                <p>
+                    Apakah kamu yakin ingin keluar
+                    dari akun Study Planner?
+                </p>
+
+                <div class="logout-actions">
+
+                    <button class="btn ghost"
+                            onclick="tutupLogout()">
+                        Batal
+                    </button>
+
+                    <button class="btn logout-confirm"
+                            onclick="logoutUser()">
+                        Ya, Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+<!-- JAVASCRIPT -->
+<script src="auth.js"></script>
+<script src="dashboard.js"></script>
+
+<script>
+    requireLogin();
+
+    function bukaLogout() {
+        document.getElementById('logoutModal')
+            .classList.add('show');
+    }
+
+    function tutupLogout() {
+        document.getElementById('logoutModal')
+            .classList.remove('show');
+    }
+
+    document.getElementById('logoutModal')
+        .addEventListener('click', function(e) {
+            if (e.target === this) {
+                tutupLogout();
+            }
+        });
+</script>
+
+</body>
+</html>

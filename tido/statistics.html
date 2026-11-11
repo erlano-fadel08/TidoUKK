@@ -1,0 +1,464 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Statistics - Study Planner</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .stats-hero{
+      padding:25px;
+      border-radius:18px;
+      background:linear-gradient(120deg,#263f32,#52765a);
+      color:white;
+      margin-bottom:20px;
+    }
+    .stats-hero p{color:#dce8dc;margin-bottom:0}
+    .stats-filter{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+    .stats-filter select{padding:10px 13px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink)}
+    .stats-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+    .stats-card{background:white;border:1px solid var(--line);border-radius:15px;padding:16px;min-width:0}
+    .stats-card small{font-size:11px;color:var(--mut);display:block}
+    .stats-card strong{font-size:25px;color:var(--dark);display:block;margin-top:7px}
+    .stats-card span{font-size:10px;color:var(--mut)}
+    .stats-progress{background:#e9eee7;height:12px;border-radius:20px;overflow:hidden;margin-top:12px}
+    .stats-progress div{height:100%;background:var(--dark);border-radius:20px;transition:width .3s}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+    .stats-panel{background:white;border:1px solid var(--line);border-radius:16px;padding:19px;min-width:0}
+    .stats-panel h3{margin:0 0 5px}
+    .stats-panel>p{font-size:12px;color:var(--mut);margin-bottom:17px}
+    .stats-bars{display:flex;flex-direction:column;gap:15px}
+    .stats-bar-row{display:grid;grid-template-columns:100px 1fr 35px;gap:9px;align-items:center;font-size:12px}
+    .stats-bar-track{height:9px;border-radius:20px;background:#edf0eb;overflow:hidden}
+    .stats-bar-fill{height:100%;border-radius:20px;background:var(--sage)}
+    .stats-bar-value{text-align:right;color:var(--mut);font-size:11px}
+    .stats-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:9px;align-items:end;height:180px;padding-top:10px}
+    .stats-week-item{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:7px;min-width:0}
+    .stats-week-count{font-size:11px;font-weight:700;color:var(--dark)}
+    .stats-week-track{height:115px;width:100%;display:flex;align-items:flex-end;background:#f0f3ed;border-radius:8px;overflow:hidden}
+    .stats-week-fill{width:100%;background:var(--sage);border-radius:8px 8px 0 0;min-height:0}
+    .stats-week-label{font-size:10px;color:var(--mut)}
+    .stats-insight{background:var(--sage-light);border-radius:14px;padding:16px;margin-bottom:17px;color:var(--dark);font-size:13px;line-height:1.7}
+    .stats-list{display:flex;flex-direction:column}
+    .stats-list-item{padding:12px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .stats-list-item:last-child{border-bottom:0}
+    .stats-list-item strong{font-size:12px;display:block;overflow-wrap:anywhere}
+    .stats-list-item small{font-size:11px;color:var(--mut);display:block;margin-top:5px}
+    .stats-tag{font-size:10px;padding:5px 8px;border-radius:20px;background:var(--sage-light);color:var(--dark);white-space:nowrap}
+    .stats-empty{text-align:center;color:var(--mut);padding:20px;font-size:12px}
+    .stats-lists{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+    @media(max-width:1000px){.stats-cards{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:750px){.stats-grid{grid-template-columns:1fr}.stats-lists{grid-template-columns:1fr 1fr}}
+    @media(max-width:520px){
+      .stats-cards{grid-template-columns:repeat(2,1fr)}
+      .stats-lists{grid-template-columns:1fr}
+      .stats-hero{padding:19px}
+      .stats-panel{padding:14px}
+      .stats-bar-row{grid-template-columns:85px 1fr 25px}
+    }
+  </style>
+</head>
+
+<body>
+<input type="checkbox" id="nt">
+
+<div id="app">
+  <aside id="side">
+    <h2>Study Planner</h2>
+    <nav id="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="tasks.html">My Tasks</a>
+      <a href="planner.html">Study Planner</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="categories.html">Categories</a>
+      <a href="statistics.html" class="on">Statistics</a>
+      <a href="settings.html">Settings</a>
+      <a href="#" class="out" onclick="bukaLogout();return false;">Logout</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header>
+      <a href="index.html" class="btn ghost" style="text-decoration:none">Menu</a>
+      <div>
+        <h1>Statistics</h1>
+        <small id="tanggalHariIni"></small>
+      </div>
+      <a href="tasks.html" class="btn ghost" style="text-decoration:none">My Tasks</a>
+    </header>
+
+    <section class="stats-hero">
+      <h2>Your Learning Progress</h2>
+      <p>Pantau perkembangan dan produktivitas belajarmu melalui statistik tugas.</p>
+    </section>
+
+    <div class="stats-filter">
+      <strong style="font-size:13px">Filter kategori:</strong>
+      <select id="filterKat">
+        <option value="all">Semua Kategori</option>
+      </select>
+    </div>
+
+    <section class="stats-cards">
+      <div class="stats-card">
+        <small>Total tugas</small>
+        <strong id="sTotal">0</strong>
+        <span>Semua tugas</span>
+      </div>
+      <div class="stats-card">
+        <small>Tugas selesai</small>
+        <strong id="sSelesai">0</strong>
+        <span>Berhasil diselesaikan</span>
+      </div>
+      <div class="stats-card">
+        <small>Belum selesai</small>
+        <strong id="sBelum">0</strong>
+        <span>Masih dikerjakan</span>
+      </div>
+      <div class="stats-card">
+        <small>Terlambat</small>
+        <strong id="sTelat">0</strong>
+        <span>Lewat deadline</span>
+      </div>
+      <div class="stats-card">
+        <small>Produktivitas</small>
+        <strong id="sPersen">0%</strong>
+        <span>Persentase selesai</span>
+      </div>
+    </section>
+
+    <section class="stats-panel" style="margin-bottom:17px">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div>
+          <h3>Overall Progress</h3>
+          <p class="mut" style="font-size:12px">Persentase tugas yang telah diselesaikan.</p>
+        </div>
+        <strong id="labelProgress">0%</strong>
+      </div>
+      <div class="stats-progress">
+        <div id="barProgress" style="width:0%"></div>
+      </div>
+    </section>
+
+    <div class="stats-insight" id="insight">
+      Memuat insight produktivitas...
+    </div>
+
+    <div class="stats-grid">
+      <section class="stats-panel">
+        <h3>Deadline Mingguan</h3>
+        <p>Jumlah tugas dengan deadline selama 7 hari ke depan.</p>
+        <div class="stats-week" id="grafikMingguan"></div>
+      </section>
+
+      <section class="stats-panel">
+        <h3>Berdasarkan Status</h3>
+        <p>Distribusi tugas berdasarkan status pengerjaan.</p>
+        <div class="stats-bars" id="byStatus"></div>
+      </section>
+
+      <section class="stats-panel">
+        <h3>Berdasarkan Prioritas</h3>
+        <p>Distribusi tugas berdasarkan tingkat prioritas.</p>
+        <div class="stats-bars" id="byPrioritas"></div>
+      </section>
+
+      <section class="stats-panel">
+        <h3>Berdasarkan Kategori</h3>
+        <p>Jumlah tugas di setiap kategori.</p>
+        <div class="stats-bars" id="byKategori"></div>
+      </section>
+    </div>
+
+    <h2 style="margin:25px 0 14px">Task Overview</h2>
+
+    <div class="stats-lists">
+      <section class="stats-panel">
+        <h3>Deadline Terlewat</h3>
+        <p>Tugas yang belum selesai dan melewati deadline.</p>
+        <div class="stats-list" id="listTelat"></div>
+      </section>
+
+      <section class="stats-panel">
+        <h3>Deadline Terdekat</h3>
+        <p>Tugas yang perlu segera diselesaikan.</p>
+        <div class="stats-list" id="listDekat"></div>
+      </section>
+
+      <section class="stats-panel">
+        <h3>Terakhir Selesai</h3>
+        <p>Daftar tugas yang sudah selesai.</p>
+        <div class="stats-list" id="listSelesai"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="cat-modal" id="logoutModal">
+  <div class="cat-modal-box" style="text-align:center">
+    <h2>Keluar dari akun?</h2>
+    <p class="mut">Apakah kamu yakin ingin keluar dari Study Planner?</p>
+    <div class="cat-modal-actions">
+      <button class="btn ghost" onclick="tutupLogout()">Batal</button>
+      <button class="btn del" onclick="logoutUser()">Ya, Logout</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+requireLogin();
+
+const KEY_TASKS='studyPlannerTasks';
+const KEY_CATS='studyPlannerCategories';
+
+let semuaTugas=[];
+let kategori=[];
+
+function $(id){return document.getElementById(id)}
+
+function esc(s){
+  return String(s??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+function baca(key){
+  try{
+    const data=JSON.parse(localStorage.getItem(key)||'[]');
+    return Array.isArray(data)?data:[];
+  }catch(e){return []}
+}
+
+function hariKey(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const t=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${t}`;
+}
+
+function tanggal(s){
+  if(!s)return null;
+  const p=s.split('-').map(Number);
+  if(p.length!==3||p.some(n=>!Number.isFinite(n)))return null;
+  const d=new Date(p[0],p[1]-1,p[2]);
+  return Number.isNaN(d.getTime())?null:d;
+}
+
+function formatTanggal(s){
+  const d=tanggal(s);
+  return d?d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):'Tanpa deadline';
+}
+
+function muat(){
+  semuaTugas=baca(KEY_TASKS);
+  kategori=baca(KEY_CATS);
+  isiFilter();
+  render();
+}
+
+function tugasTerfilter(){
+  const filter=$('filterKat').value;
+  if(filter==='all')return semuaTugas;
+  return semuaTugas.filter(t=>(t.kategori||'Lainnya')===filter);
+}
+
+function isiFilter(){
+  const sebelumnya=$('filterKat').value;
+  const nama=[...new Set([
+    ...kategori.map(k=>k.nama),
+    ...semuaTugas.map(t=>t.kategori||'Lainnya')
+  ].filter(Boolean))];
+
+  $('filterKat').innerHTML='<option value="all">Semua Kategori</option>'+
+    nama.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+
+  if(nama.includes(sebelumnya))$('filterKat').value=sebelumnya;
+}
+
+function render(){
+  const data=tugasTerfilter();
+  const hariIni=hariKey(new Date());
+  const selesai=data.filter(t=>t.status==='Completed').length;
+  const belum=data.length-selesai;
+  const telat=data.filter(t=>
+    t.status!=='Completed'&&t.deadline&&t.deadline<hariIni
+  ).length;
+  const persen=data.length?Math.round(selesai/data.length*100):0;
+
+  $('sTotal').textContent=data.length;
+  $('sSelesai').textContent=selesai;
+  $('sBelum').textContent=belum;
+  $('sTelat').textContent=telat;
+  $('sPersen').textContent=persen+'%';
+  $('labelProgress').textContent=persen+'%';
+  $('barProgress').style.width=persen+'%';
+
+  renderMingguan(data);
+  renderStatus(data);
+  renderPrioritas(data);
+  renderKategori(data);
+  renderInsight(data,persen,telat);
+  renderDaftar(data,hariIni);
+}
+
+function renderMingguan(data){
+  const awal=new Date();
+  awal.setHours(0,0,0,0);
+  const jumlah=[];
+
+  for(let i=0;i<7;i++){
+    const d=new Date(awal);
+    d.setDate(awal.getDate()+i);
+    const key=hariKey(d);
+    jumlah.push({
+      nama:d.toLocaleDateString('id-ID',{weekday:'short'}),
+      total:data.filter(t=>t.deadline===key).length
+    });
+  }
+
+  const max=Math.max(1,...jumlah.map(x=>x.total));
+
+  $('grafikMingguan').innerHTML=jumlah.map(x=>{
+    const tinggi=x.total?Math.max(8,x.total/max*100):0;
+    return `
+      <div class="stats-week-item">
+        <span class="stats-week-count">${x.total}</span>
+        <div class="stats-week-track">
+          <div class="stats-week-fill" style="height:${tinggi}%"></div>
+        </div>
+        <span class="stats-week-label">${x.nama}</span>
+      </div>`;
+  }).join('');
+}
+
+function renderBar(id,items){
+  const max=Math.max(1,...items.map(x=>x.total));
+
+  if(!items.length){
+    $(id).innerHTML='<div class="stats-empty">Belum ada data.</div>';
+    return;
+  }
+
+  $(id).innerHTML=items.map(x=>`
+    <div class="stats-bar-row">
+      <span>${esc(x.nama)}</span>
+      <div class="stats-bar-track">
+        <div class="stats-bar-fill" style="width:${x.total/max*100}%"></div>
+      </div>
+      <span class="stats-bar-value">${x.total}</span>
+    </div>
+  `).join('');
+}
+
+function renderStatus(data){
+  renderBar('byStatus',[
+    {nama:'To Do',total:data.filter(t=>t.status==='To Do').length},
+    {nama:'In Progress',total:data.filter(t=>t.status==='In Progress').length},
+    {nama:'Completed',total:data.filter(t=>t.status==='Completed').length}
+  ]);
+}
+
+function renderPrioritas(data){
+  renderBar('byPrioritas',[
+    {nama:'High',total:data.filter(t=>t.prioritas==='High').length},
+    {nama:'Medium',total:data.filter(t=>t.prioritas==='Medium').length},
+    {nama:'Low',total:data.filter(t=>t.prioritas==='Low').length}
+  ]);
+}
+
+function renderKategori(data){
+  const nama=[...new Set([
+    ...kategori.map(k=>k.nama),
+    ...data.map(t=>t.kategori||'Lainnya')
+  ])];
+
+  renderBar('byKategori',nama.map(n=>({
+    nama:n,
+    total:data.filter(t=>(t.kategori||'Lainnya')===n).length
+  })).filter(x=>x.total>0));
+}
+
+function renderInsight(data,persen,telat){
+  let pesan='Mulai tambahkan tugas agar progres belajarmu bisa dipantau.';
+
+  if(data.length){
+    if(persen===100){
+      pesan='Hebat! Semua tugas dalam kategori yang dipilih sudah selesai. Pertahankan kebiasaan positif ini!';
+    }else if(telat>0){
+      pesan=`Kamu memiliki ${telat} tugas yang melewati deadline. Coba prioritaskan tugas tersebut agar tidak semakin menumpuk.`;
+    }else if(persen>=70){
+      pesan='Progresmu sudah bagus! Sebagian besar tugas berhasil diselesaikan. Tetap pertahankan konsistensimu.';
+    }else if(persen>=30){
+      pesan='Kamu sudah mulai menyelesaikan beberapa tugas. Buat jadwal belajar agar progres semakin meningkat.';
+    }else{
+      pesan='Yuk, mulai kerjakan tugas dari yang paling penting dan paling dekat deadline-nya.';
+    }
+  }
+
+  $('insight').textContent=pesan;
+}
+
+function itemTugas(t){
+  return `
+    <div class="stats-list-item">
+      <div>
+        <strong>${esc(t.nama||'(Tanpa nama)')}</strong>
+        <small>${esc(t.kategori||'Lainnya')} · ${formatTanggal(t.deadline)}</small>
+      </div>
+      <span class="stats-tag">${esc(t.prioritas||'Medium')}</span>
+    </div>`;
+}
+
+function isiDaftar(id,data,kosong){
+  $(id).innerHTML=data.length?
+    data.map(itemTugas).join(''):
+    `<div class="stats-empty">${kosong}</div>`;
+}
+
+function renderDaftar(data,hariIni){
+  const telat=data.filter(t=>
+    t.status!=='Completed'&&t.deadline&&t.deadline<hariIni
+  ).sort((a,b)=>a.deadline.localeCompare(b.deadline));
+
+  const dekat=data.filter(t=>
+    t.status!=='Completed'&&t.deadline&&t.deadline>=hariIni
+  ).sort((a,b)=>a.deadline.localeCompare(b.deadline)).slice(0,5);
+
+  const selesai=data.filter(t=>t.status==='Completed').slice(-5).reverse();
+
+  isiDaftar('listTelat',telat.slice(0,5),'Tidak ada tugas terlambat.');
+  isiDaftar('listDekat',dekat,'Tidak ada deadline mendatang.');
+  isiDaftar('listSelesai',selesai,'Belum ada tugas selesai.');
+}
+
+$('filterKat').addEventListener('change',render);
+
+function bukaLogout(){
+  $('logoutModal').classList.add('show');
+}
+
+function tutupLogout(){
+  $('logoutModal').classList.remove('show');
+}
+
+$('logoutModal').addEventListener('click',function(e){
+  if(e.target===$('logoutModal'))tutupLogout();
+});
+
+$('tanggalHariIni').textContent=new Date().toLocaleDateString('id-ID',{
+  weekday:'long',day:'numeric',month:'long',year:'numeric'
+});
+
+window.addEventListener('storage',function(e){
+  if(e.key===KEY_TASKS||e.key===KEY_CATS)muat();
+});
+
+window.addEventListener('pageshow',muat);
+
+muat();
+</script>
+</body>
+</html>

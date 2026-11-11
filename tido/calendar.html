@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calendar - Study Planner</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .cal-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+    .cal-nav{display:flex;align-items:center;gap:8px}
+    .cal-nav button{border:1px solid var(--line);background:white;padding:9px 13px;border-radius:10px;cursor:pointer;color:var(--ink)}
+    .cal-nav button:hover{background:var(--sage-light)}
+    .cal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+    .cal-stat{background:var(--sage-light);padding:14px;border-radius:13px}
+    .cal-stat small{display:block;color:var(--mut);font-size:12px}
+    .cal-stat strong{display:block;color:var(--dark);font-size:23px;margin-top:5px}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+    .cal-day-name{text-align:center;color:var(--mut);font-size:12px;font-weight:700;padding:10px 0}
+    .cal-date{min-height:100px;border:1px solid var(--line);border-radius:12px;padding:9px;background:white;cursor:pointer;transition:.2s;min-width:0}
+    .cal-date:hover{border-color:var(--sage);background:var(--sage-light)}
+    .cal-date.selected{border:2px solid var(--dark);background:var(--sage-light)}
+    .cal-date.today .cal-number{background:var(--dark);color:white}
+    .cal-date.other-month{opacity:.35}
+    .cal-number{width:27px;height:27px;display:grid;place-items:center;border-radius:8px;font-size:12px;font-weight:700}
+    .cal-dots{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+    .cal-dots i{width:7px;height:7px;border-radius:50%;background:var(--sage)}
+    .cal-more{font-size:10px;color:var(--mut);margin-top:5px}
+    .cal-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}
+    .cal-legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mut)}
+    .cal-legend i{width:9px;height:9px;border-radius:50%}
+    .cal-bottom{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:18px}
+    .cal-task{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+    .cal-task:last-child{border-bottom:0}
+    .cal-task input{width:17px;height:17px;accent-color:var(--dark);margin-top:3px}
+    .cal-task-info{flex:1;min-width:0}
+    .cal-task-info strong{font-size:13px;display:block;overflow-wrap:anywhere}
+    .cal-task-info small{font-size:11px;color:var(--mut);display:block;margin-top:5px}
+    .cal-empty{text-align:center;padding:28px 10px;color:var(--mut);font-size:13px}
+    .cal-chip{display:inline-block;border-radius:20px;padding:4px 8px;font-size:10px;margin-top:6px;background:var(--sage-light);color:var(--dark)}
+    .cal-task.done strong{text-decoration:line-through;color:var(--mut)}
+    .cal-detail-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    @media(max-width:650px){
+      .cal-grid{gap:4px}
+      .cal-date{min-height:67px;padding:5px 3px;border-radius:8px}
+      .cal-number{width:23px;height:23px;font-size:10px}
+      .cal-day-name{font-size:10px}
+      .cal-dots{gap:3px;margin-top:6px}
+      .cal-dots i{width:5px;height:5px}
+      .cal-more{font-size:9px}
+      .cal-bottom{grid-template-columns:1fr}
+      .cal-stats{gap:7px}
+      .cal-stat{padding:10px}
+      .cal-stat strong{font-size:19px}
+    }
+  </style>
+</head>
+
+<body>
+
+<input type="checkbox" id="nt">
+
+<div id="app">
+
+  <aside id="side">
+    <h2>Study Planner</h2>
+    <nav id="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="tasks.html">My Tasks</a>
+      <a href="planner.html">Study Planner</a>
+      <a href="calendar.html" class="on">Calendar</a>
+      <a href="categories.html">Categories</a>
+      <a href="statistics.html">Statistics</a>
+      <a href="settings.html">Settings</a>
+      <a href="#" class="out" onclick="bukaLogout();return false;">Logout</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header>
+      <a href="index.html" class="btn ghost" style="text-decoration:none">Menu</a>
+      <div>
+        <h1>Calendar</h1>
+        <small id="tanggalHariIni"></small>
+      </div>
+      <a class="btn ghost" href="index.html#notif">
+        Notifikasi <b id="badge">0</b>
+      </a>
+    </header>
+
+    <section class="card">
+      <div class="cal-top">
+        <div>
+          <h2 style="margin:0">Kalender Tugas</h2>
+          <p class="mut">Lihat dan pantau deadline tugasmu.</p>
+        </div>
+        <div class="cal-nav">
+          <button id="prev" type="button">‹</button>
+          <button id="hariIni" type="button">Hari ini</button>
+          <button id="next" type="button">›</button>
+        </div>
+      </div>
+
+      <div class="cal-stats">
+        <div class="cal-stat">
+          <small>Total tugas bulan ini</small>
+          <strong id="statTotal">0</strong>
+        </div>
+        <div class="cal-stat">
+          <small>Belum selesai</small>
+          <strong id="statBelum">0</strong>
+        </div>
+        <div class="cal-stat">
+          <small>Selesai</small>
+          <strong id="statSelesai">0</strong>
+        </div>
+      </div>
+
+      <div class="cal-detail-head">
+        <h3 id="judulBulan"></h3>
+        <small class="mut">Pilih tanggal untuk melihat tugas</small>
+      </div>
+
+      <div class="cal-grid" id="grid"></div>
+
+      <div class="cal-legend" id="legend"></div>
+    </section>
+
+    <div class="cal-bottom">
+      <section class="card">
+        <div class="cal-detail-head">
+          <h3 id="detailJudul">Detail Tanggal</h3>
+          <a href="tasks.html" class="btn ghost" style="text-decoration:none">My Tasks</a>
+        </div>
+        <div id="detailIsi">
+          <div class="cal-empty">Pilih tanggal pada kalender.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Informasi Kalender</h3>
+        <p class="mut" style="font-size:13px;line-height:1.7">
+          Kalender ini mengambil data langsung dari halaman My Tasks.
+          Tambahkan deadline pada tugas untuk menampilkannya di kalender.
+        </p>
+        <div class="cal-chip">Terhubung dengan My Tasks</div>
+        <div class="cal-chip">Data tersimpan otomatis</div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="task-modal" id="logoutModal">
+  <div class="task-modal-box" style="max-width:360px;text-align:center">
+    <div class="logout-icon">↗</div>
+    <h2>Keluar dari akun?</h2>
+    <p class="mut">Apakah kamu yakin ingin keluar dari Study Planner?</p>
+    <div class="task-modal-actions">
+      <button class="btn ghost" onclick="tutupLogout()">Batal</button>
+      <button class="btn del" onclick="logoutUser()">Ya, Logout</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+requireLogin();
+
+const KEY_TASKS='studyPlannerTasks';
+const KEY_CATS='studyPlannerCategories';
+
+const bulanNama=[
+  'Januari','Februari','Maret','April','Mei','Juni',
+  'Juli','Agustus','September','Oktober','November','Desember'
+];
+
+const hariNama=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+
+let bulanAktif=new Date();
+let tanggalDipilih=new Date();
+let semuaTugas=[];
+let kategoriWarna={};
+
+function $(id){return document.getElementById(id)}
+
+function esc(s){
+  return String(s??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+function bacaTugas(){
+  try{
+    const data=JSON.parse(localStorage.getItem(KEY_TASKS)||'[]');
+    return Array.isArray(data)?data:[];
+  }catch(e){return []}
+}
+
+function bacaKategori(){
+  try{
+    const data=JSON.parse(localStorage.getItem(KEY_CATS)||'[]');
+    kategoriWarna={};
+    data.forEach(k=>{
+      if(k&&k.nama)kategoriWarna[k.nama]=k.warna;
+    });
+  }catch(e){kategoriWarna={}}
+}
+
+function warnaKategori(nama){
+  return kategoriWarna[nama]||'#A8B99A';
+}
+
+function keyTanggal(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const t=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+t;
+}
+
+function tanggalDariKey(s){
+  const p=s.split('-').map(Number);
+  return new Date(p[0],p[1]-1,p[2]);
+}
+
+function formatTanggal(d){
+  return d.toLocaleDateString('id-ID',{
+    weekday:'long',day:'numeric',month:'long',year:'numeric'
+  });
+}
+
+function muat(){
+  semuaTugas=bacaTugas();
+  bacaKategori();
+  render();
+}
+
+function render(){
+  const tahun=bulanAktif.getFullYear();
+  const bulan=bulanAktif.getMonth();
+
+  $('judulBulan').textContent=bulanNama[bulan]+' '+tahun;
+
+  const pertama=new Date(tahun,bulan,1);
+  const awal=new Date(tahun,bulan,1-pertama.getDay());
+  const hariIni=keyTanggal(new Date());
+  const dipilih=keyTanggal(tanggalDipilih);
+
+  let html=hariNama.map(h=>
+    '<div class="cal-day-name">'+h+'</div>'
+  ).join('');
+
+  for(let i=0;i<42;i++){
+    const d=new Date(awal);
+    d.setDate(awal.getDate()+i);
+    const key=keyTanggal(d);
+    const tugas=semuaTugas.filter(t=>t.deadline===key);
+    const titik=tugas.slice(0,4).map(t=>
+      '<i style="background:'+esc(warnaKategori(t.kategori))+'"></i>'
+    ).join('');
+
+    html+=`
+      <div class="cal-date
+        ${d.getMonth()!==bulan?'other-month':''}
+        ${key===hariIni?'today':''}
+        ${key===dipilih?'selected':''}"
+        data-date="${key}" tabindex="0" role="button">
+        <div class="cal-number">${d.getDate()}</div>
+        <div class="cal-dots">${titik}</div>
+        ${tugas.length>4?'<div class="cal-more">+'+(tugas.length-4)+'</div>':''}
+      </div>`;
+  }
+
+  $('grid').innerHTML=html;
+  renderStat();
+  renderDetail();
+  renderLegend();
+}
+
+function renderStat(){
+  const bulan=bulanAktif.getMonth();
+  const tahun=bulanAktif.getFullYear();
+  const data=semuaTugas.filter(t=>{
+    if(!t.deadline)return false;
+    const d=tanggalDariKey(t.deadline);
+    return d.getMonth()===bulan&&d.getFullYear()===tahun;
+  });
+
+  $('statTotal').textContent=data.length;
+  $('statSelesai').textContent=data.filter(t=>t.status==='Completed').length;
+  $('statBelum').textContent=data.filter(t=>t.status!=='Completed').length;
+
+  const batas=new Date();
+  batas.setHours(23,59,59,999);
+  batas.setDate(batas.getDate()+3);
+  $('badge').textContent=semuaTugas.filter(t=>{
+    if(t.status==='Completed'||!t.deadline)return false;
+    return tanggalDariKey(t.deadline)<=batas;
+  }).length;
+}
+
+function renderDetail(){
+  const key=keyTanggal(tanggalDipilih);
+  const data=semuaTugas.filter(t=>t.deadline===key);
+
+  $('detailJudul').textContent=formatTanggal(tanggalDipilih);
+
+  if(!data.length){
+    $('detailIsi').innerHTML='<div class="cal-empty">Tidak ada tugas pada tanggal ini.</div>';
+    return;
+  }
+
+  $('detailIsi').innerHTML=data.map(t=>{
+    const index=semuaTugas.indexOf(t);
+    return `
+      <div class="cal-task ${t.status==='Completed'?'done':''}">
+        <input type="checkbox" data-index="${index}"
+          ${t.status==='Completed'?'checked':''}
+          aria-label="Tandai tugas selesai">
+        <div class="cal-task-info">
+          <strong>${esc(t.nama||'(Tanpa nama)')}</strong>
+          <small>${esc(t.jam||'Tanpa jam')} · ${esc(t.prioritas||'Medium')}</small>
+          <span class="cal-chip" style="background:${esc(warnaKategori(t.kategori))}22">
+            ${esc(t.kategori||'Lainnya')}
+          </span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderLegend(){
+  const nama=[...new Set(semuaTugas.map(t=>t.kategori||'Lainnya'))];
+  if(!nama.length){
+    $('legend').innerHTML='<span>Belum ada kategori tugas.</span>';
+    return;
+  }
+
+  $('legend').innerHTML=nama.map(n=>
+    '<span><i style="background:'+esc(warnaKategori(n))+'"></i>'+esc(n)+'</span>'
+  ).join('');
+}
+
+$('grid').addEventListener('click',function(e){
+  const el=e.target.closest('[data-date]');
+  if(!el)return;
+  tanggalDipilih=tanggalDariKey(el.dataset.date);
+  if(tanggalDipilih.getMonth()!==bulanAktif.getMonth()||
+     tanggalDipilih.getFullYear()!==bulanAktif.getFullYear()){
+    bulanAktif=new Date(tanggalDipilih);
+  }
+  render();
+});
+
+$('grid').addEventListener('keydown',function(e){
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  const el=e.target.closest('[data-date]');
+  if(!el)return;
+  e.preventDefault();
+  tanggalDipilih=tanggalDariKey(el.dataset.date);
+  bulanAktif=new Date(tanggalDipilih);
+  render();
+});
+
+$('detailIsi').addEventListener('change',function(e){
+  if(!e.target.matches('input[type="checkbox"][data-index]'))return;
+
+  const index=Number(e.target.dataset.index);
+  if(!semuaTugas[index])return;
+
+  semuaTugas[index].status=e.target.checked?'Completed':'To Do';
+  localStorage.setItem(KEY_TASKS,JSON.stringify(semuaTugas));
+  render();
+});
+
+$('prev').addEventListener('click',function(){
+  bulanAktif.setMonth(bulanAktif.getMonth()-1);
+  render();
+});
+
+$('next').addEventListener('click',function(){
+  bulanAktif.setMonth(bulanAktif.getMonth()+1);
+  render();
+});
+
+$('hariIni').addEventListener('click',function(){
+  bulanAktif=new Date();
+  tanggalDipilih=new Date();
+  render();
+});
+
+function bukaLogout(){
+  $('logoutModal').classList.add('show');
+}
+
+function tutupLogout(){
+  $('logoutModal').classList.remove('show');
+}
+
+$('logoutModal').addEventListener('click',function(e){
+  if(e.target===$('logoutModal'))tutupLogout();
+});
+
+$('tanggalHariIni').textContent=formatTanggal(new Date());
+
+window.addEventListener('storage',function(e){
+  if(e.key===KEY_TASKS||e.key===KEY_CATS)muat();
+});
+
+window.addEventListener('pageshow',muat);
+
+muat();
+</script>
+
+</body>
+</html>

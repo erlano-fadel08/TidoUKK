@@ -1,0 +1,541 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Study Planner - Study Planner</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .planner-wrap{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr);gap:18px}
+    .planner-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+    .planner-title h2{margin:0}
+    .week-nav{display:flex;align-items:center;gap:8px}
+    .week-nav button{border:1px solid var(--line);background:white;color:var(--ink);padding:9px 13px;border-radius:10px;cursor:pointer}
+    .week-nav button:hover{background:var(--sage-light)}
+    .week-label{font-size:13px;color:var(--mut);font-weight:600}
+    .week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+    .day-card{border:1px solid var(--line);border-radius:13px;padding:11px 7px;min-height:125px;background:white;cursor:pointer;transition:.2s}
+    .day-card:hover{border-color:var(--sage);transform:translateY(-2px)}
+    .day-card.active{border:2px solid var(--dark);background:var(--sage-light)}
+    .day-card.today .day-number{background:var(--dark);color:white}
+    .day-name{text-align:center;color:var(--mut);font-size:11px;font-weight:700}
+    .day-number{width:29px;height:29px;border-radius:9px;display:grid;place-items:center;margin:7px auto;font-weight:700;font-size:13px}
+    .day-count{text-align:center;font-size:10px;color:var(--mut)}
+    .day-dots{display:flex;justify-content:center;gap:4px;margin-top:9px;flex-wrap:wrap}
+    .day-dots i{width:6px;height:6px;border-radius:50%;background:var(--sage)}
+    .day-dots i.done{background:var(--green)}
+    .selected-day{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:22px 0 13px;flex-wrap:wrap}
+    .selected-day h3{margin:0}
+    .schedule-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+    .schedule-item:last-child{border-bottom:0}
+    .schedule-time{min-width:75px;color:var(--dark);font-size:12px;font-weight:700;padding-top:3px}
+    .schedule-info{flex:1;min-width:0}
+    .schedule-info strong{display:block;font-size:14px;overflow-wrap:anywhere}
+    .schedule-info small{display:block;color:var(--mut);font-size:12px;margin-top:5px}
+    .schedule-actions{display:flex;gap:5px;flex-wrap:wrap}
+    .mini-btn{border:1px solid var(--line);background:white;border-radius:8px;padding:6px 9px;cursor:pointer;color:var(--ink);font-size:12px}
+    .mini-btn:hover{background:var(--sage-light)}
+    .mini-btn.danger{color:var(--red)}
+    .schedule-item.is-done .schedule-info strong{text-decoration:line-through;color:var(--mut)}
+    .schedule-item.is-done{opacity:.65}
+    .empty-state{text-align:center;padding:30px 15px;color:var(--mut);font-size:13px}
+    .empty-icon{font-size:30px;margin-bottom:8px}
+    .planner-form label{display:block;margin:12px 0 6px;font-size:13px;font-weight:600}
+    .planner-form input,.planner-form select,.planner-form textarea{width:100%;box-sizing:border-box}
+    .form-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .planner-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}
+    .planner-stat{background:var(--sage-light);border-radius:12px;padding:12px}
+    .planner-stat small{display:block;color:var(--mut);font-size:11px}
+    .planner-stat strong{display:block;color:var(--dark);font-size:22px;margin-top:5px}
+    .planner-progress{height:8px;background:var(--line);border-radius:20px;overflow:hidden;margin-top:10px}
+    .planner-progress i{display:block;height:100%;background:var(--dark);border-radius:20px;transition:width .3s}
+    .form-actions{display:flex;gap:8px;margin-top:16px}
+    .form-actions button{flex:1}
+    .planner-note{font-size:12px;color:var(--mut);line-height:1.6}
+    .modal-bg{display:none;position:fixed;inset:0;background:#17251dcc;z-index:1000;align-items:center;justify-content:center;padding:16px}
+    .modal-bg.show{display:flex}
+    .modal-box{background:white;border-radius:18px;padding:25px;width:100%;max-width:360px;text-align:center}
+    .modal-box h3{margin-top:0}
+    .modal-box p{color:var(--mut);font-size:14px}
+    .modal-buttons{display:flex;gap:9px;margin-top:18px}
+    .modal-buttons button{flex:1}
+    @media(max-width:850px){.planner-wrap{grid-template-columns:1fr}}
+    @media(max-width:520px){
+      .week-grid{gap:4px}
+      .day-card{padding:8px 2px;min-height:105px}
+      .day-name{font-size:9px}
+      .day-count{font-size:9px}
+      .planner-stats{gap:6px}
+      .planner-stat{padding:9px}
+      .planner-stat strong{font-size:18px}
+      .schedule-item{gap:7px;flex-wrap:wrap}
+      .schedule-time{min-width:65px}
+      .schedule-actions{width:100%;padding-left:72px}
+    }
+  </style>
+</head>
+
+<body>
+
+<input type="checkbox" id="nt">
+
+<div id="app">
+
+  <aside id="side">
+    <h2>Study Planner</h2>
+    <nav id="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="tasks.html">My Tasks</a>
+      <a href="planner.html" class="on">Study Planner</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="categories.html">Categories</a>
+      <a href="statistics.html">Statistics</a>
+      <a href="settings.html">Settings</a>
+      <a href="#" class="out" onclick="bukaLogout();return false;">Logout</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header>
+      <a href="index.html" class="btn ghost" style="text-decoration:none">Menu</a>
+      <div>
+        <h1>Study Planner</h1>
+        <small id="tanggalHariIni"></small>
+      </div>
+      <a class="btn ghost" href="index.html#notif">
+        Notifikasi <b id="badge">0</b>
+      </a>
+    </header>
+
+    <section class="card">
+      <div class="planner-title">
+        <div>
+          <h2>Jadwal Belajar</h2>
+          <p class="planner-note">Atur waktu belajar dan capai targetmu setiap hari.</p>
+        </div>
+        <button class="btn" onclick="bukaForm()">+ Jadwal Baru</button>
+      </div>
+
+      <div class="planner-stats">
+        <div class="planner-stat">
+          <small>Total Jadwal</small>
+          <strong id="totalJadwal">0</strong>
+        </div>
+        <div class="planner-stat">
+          <small>Selesai</small>
+          <strong id="jadwalSelesai">0</strong>
+        </div>
+        <div class="planner-stat">
+          <small>Belum Selesai</small>
+          <strong id="jadwalBelum">0</strong>
+        </div>
+      </div>
+
+      <small id="labelProgress">Progress mingguan 0%</small>
+      <div class="planner-progress">
+        <i id="progressMingguan" style="width:0%"></i>
+      </div>
+    </section>
+
+    <br>
+
+    <div class="planner-wrap">
+      <section class="card">
+        <div class="planner-title">
+          <h3>Kalender Mingguan</h3>
+          <div class="week-nav">
+            <button type="button" onclick="ubahMinggu(-1)">‹</button>
+            <button type="button" onclick="keMingguIni()">Hari ini</button>
+            <button type="button" onclick="ubahMinggu(1)">›</button>
+          </div>
+        </div>
+
+        <p class="week-label" id="labelMinggu"></p>
+        <div class="week-grid" id="weekGrid"></div>
+
+        <div class="selected-day">
+          <h3 id="judulHari">Jadwal Hari Ini</h3>
+          <small id="jumlahHari" class="mut"></small>
+        </div>
+
+        <div id="daftarJadwal"></div>
+      </section>
+
+      <section class="card">
+        <h3 id="judulForm">Tambah Jadwal</h3>
+        <p class="planner-note">Isi informasi jadwal belajar yang ingin kamu lakukan.</p>
+
+        <form id="formJadwal" class="planner-form">
+          <input type="hidden" id="jadwalId">
+
+          <label for="namaJadwal">Nama kegiatan</label>
+          <input id="namaJadwal" type="text" placeholder="Contoh: Belajar Matematika" required maxlength="80">
+
+          <label for="kategoriJadwal">Mata pelajaran / kategori</label>
+          <select id="kategoriJadwal">
+            <option>Matematika</option>
+            <option>Bahasa Indonesia</option>
+            <option>Bahasa Inggris</option>
+            <option>Pemrograman</option>
+            <option>Basis Data</option>
+            <option>Produktif PPLG</option>
+            <option>Belajar Mandiri</option>
+            <option>Lainnya</option>
+          </select>
+
+          <label for="tanggalJadwal">Tanggal</label>
+          <input id="tanggalJadwal" type="date" required>
+
+          <div class="form-two">
+            <div>
+              <label for="jamMulai">Mulai</label>
+              <input id="jamMulai" type="time" required>
+            </div>
+            <div>
+              <label for="jamSelesai">Selesai</label>
+              <input id="jamSelesai" type="time" required>
+            </div>
+          </div>
+
+          <label for="targetJadwal">Target belajar</label>
+          <input id="targetJadwal" type="text" placeholder="Contoh: Memahami 2 materi" maxlength="120">
+
+          <label for="catatanJadwal">Catatan (opsional)</label>
+          <textarea id="catatanJadwal" rows="3" placeholder="Tulis catatan belajar..."></textarea>
+
+          <div class="form-actions">
+            <button class="btn" type="submit" id="btnSimpan">Simpan Jadwal</button>
+            <button class="btn ghost" type="button" onclick="resetForm()">Reset</button>
+          </div>
+          <p id="pesanForm" class="planner-note"></p>
+        </form>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal-bg" id="logoutModal">
+  <div class="modal-box">
+    <h3>Keluar dari akun?</h3>
+    <p>Apakah kamu yakin ingin mengakhiri sesi Study Planner?</p>
+    <div class="modal-buttons">
+      <button class="btn ghost" onclick="tutupLogout()">Batal</button>
+      <button class="btn del" onclick="logoutUser()">Ya, Logout</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+requireLogin();
+
+const KEY_SCHEDULE = 'studyPlannerSchedule';
+const hariNama = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+let jadwal = [];
+let tanggalAktif = new Date();
+tanggalAktif.setHours(0,0,0,0);
+
+function $(id){return document.getElementById(id)}
+
+function tanggalKey(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const t=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+t;
+}
+
+function dariKey(s){
+  const p=s.split('-').map(Number);
+  return new Date(p[0],p[1]-1,p[2]);
+}
+
+function escapeHTML(s){
+  return String(s??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+function muatData(){
+  try{
+    const data=JSON.parse(localStorage.getItem(KEY_SCHEDULE)||'[]');
+    jadwal=Array.isArray(data)?data:[];
+  }catch(e){jadwal=[]}
+}
+
+function simpanData(){
+  localStorage.setItem(KEY_SCHEDULE,JSON.stringify(jadwal));
+}
+
+function awalMinggu(d){
+  const x=new Date(d);
+  x.setDate(x.getDate()-x.getDay()+1);
+  x.setHours(0,0,0,0);
+  return x;
+}
+
+function render(){
+  const awal=awalMinggu(tanggalAktif);
+  const akhir=new Date(awal);
+  akhir.setDate(awal.getDate()+6);
+
+  $('labelMinggu').textContent=
+    awal.toLocaleDateString('id-ID',{day:'numeric',month:'short'})+
+    ' - '+akhir.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+
+  const minggu=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(awal);
+    d.setDate(awal.getDate()+i);
+    minggu.push(d);
+  }
+
+  $('weekGrid').innerHTML=minggu.map(d=>{
+    const key=tanggalKey(d);
+    const isi=jadwal.filter(j=>j.tanggal===key);
+    const aktif=key===tanggalKey(tanggalAktif);
+    const today=key===tanggalKey(new Date());
+    const dots=isi.slice(0,5).map(j=>
+      '<i class="'+(j.selesai?'done':'')+'"></i>'
+    ).join('');
+
+    return `
+      <div class="day-card ${aktif?'active':''} ${today?'today':''}"
+           data-date="${key}" tabindex="0" role="button">
+        <div class="day-name">${hariNama[d.getDay()]}</div>
+        <div class="day-number">${d.getDate()}</div>
+        <div class="day-count">${isi.length} jadwal</div>
+        <div class="day-dots">${dots}</div>
+      </div>`;
+  }).join('');
+
+  renderDaftar();
+  renderStatistik();
+}
+
+function renderDaftar(){
+  const key=tanggalKey(tanggalAktif);
+  const data=jadwal.filter(j=>j.tanggal===key)
+    .sort((a,b)=>a.mulai.localeCompare(b.mulai));
+
+  $('judulHari').textContent=tanggalAktif.toLocaleDateString('id-ID',{
+    weekday:'long',day:'numeric',month:'long'
+  });
+  $('jumlahHari').textContent=data.length+' jadwal';
+
+  if(!data.length){
+    $('daftarJadwal').innerHTML=`
+      <div class="empty-state">
+        <div class="empty-icon">📚</div>
+        Belum ada jadwal belajar pada hari ini.<br>
+        Tambahkan jadwal agar kegiatanmu lebih teratur.
+      </div>`;
+    return;
+  }
+
+  $('daftarJadwal').innerHTML=data.map(j=>`
+    <div class="schedule-item ${j.selesai?'is-done':''}">
+      <div class="schedule-time">${escapeHTML(j.mulai)}<br>${escapeHTML(j.selesai)}</div>
+      <div class="schedule-info">
+        <strong>${escapeHTML(j.nama)}</strong>
+        <small>${escapeHTML(j.kategori)} · ${escapeHTML(j.target||'Tanpa target')}</small>
+        ${j.catatan?'<small>'+escapeHTML(j.catatan)+'</small>':''}
+      </div>
+      <div class="schedule-actions">
+        <button class="mini-btn" data-action="toggle" data-id="${escapeHTML(j.id)}">
+          ${j.selesai?'Batal selesai':'✓ Selesai'}
+        </button>
+        <button class="mini-btn" data-action="edit" data-id="${escapeHTML(j.id)}">Edit</button>
+        <button class="mini-btn danger" data-action="delete" data-id="${escapeHTML(j.id)}">Hapus</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStatistik(){
+  const awal=awalMinggu(tanggalAktif);
+  const akhir=new Date(awal);
+  akhir.setDate(akhir.getDate()+7);
+
+  const data=jadwal.filter(j=>{
+    const d=dariKey(j.tanggal);
+    return d>=awal&&d<akhir;
+  });
+
+  const selesai=data.filter(j=>j.selesai).length;
+  const total=data.length;
+  const persen=total?Math.round(selesai/total*100):0;
+
+  $('totalJadwal').textContent=total;
+  $('jadwalSelesai').textContent=selesai;
+  $('jadwalBelum').textContent=total-selesai;
+  $('labelProgress').textContent='Progress mingguan '+persen+'%';
+  $('progressMingguan').style.width=persen+'%';
+
+  const hariIni=tanggalKey(new Date());
+  $('badge').textContent=jadwal.filter(j=>
+    !j.selesai&&j.tanggal===hariIni
+  ).length;
+}
+
+function bukaForm(id){
+  resetForm();
+  if(id){
+    const j=jadwal.find(x=>x.id===id);
+    if(!j)return;
+
+    $('jadwalId').value=j.id;
+    $('namaJadwal').value=j.nama;
+    $('kategoriJadwal').value=j.kategori;
+    $('tanggalJadwal').value=j.tanggal;
+    $('jamMulai').value=j.mulai;
+    $('jamSelesai').value=j.selesai;
+    $('targetJadwal').value=j.target||'';
+    $('catatanJadwal').value=j.catatan||'';
+    $('judulForm').textContent='Edit Jadwal';
+    $('btnSimpan').textContent='Simpan Perubahan';
+  }else{
+    $('tanggalJadwal').value=tanggalKey(tanggalAktif);
+  }
+
+  $('namaJadwal').focus();
+}
+
+function resetForm(){
+  $('formJadwal').reset();
+  $('jadwalId').value='';
+  $('judulForm').textContent='Tambah Jadwal';
+  $('btnSimpan').textContent='Simpan Jadwal';
+  $('pesanForm').textContent='';
+}
+
+$('formJadwal').addEventListener('submit',function(e){
+  e.preventDefault();
+
+  const id=$('jadwalId').value;
+  const nama=$('namaJadwal').value.trim();
+  const tanggal=$('tanggalJadwal').value;
+  const mulai=$('jamMulai').value;
+  const selesai=$('jamSelesai').value;
+
+  if(!nama||!tanggal||!mulai||!selesai)return;
+
+  if(selesai<=mulai){
+    $('pesanForm').textContent='Jam selesai harus setelah jam mulai.';
+    return;
+  }
+
+  const data={
+    id:id||('jadwal-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),
+    nama:nama,
+    kategori:$('kategoriJadwal').value,
+    tanggal:tanggal,
+    mulai:mulai,
+    selesai:selesai,
+    target:$('targetJadwal').value.trim(),
+    catatan:$('catatanJadwal').value.trim(),
+    selesaiStatus:false
+  };
+
+  if(id){
+    const index=jadwal.findIndex(j=>j.id===id);
+    if(index>=0){
+      data.selesaiStatus=jadwal[index].selesai;
+      jadwal[index]={
+        ...data,
+        selesai:data.selesaiStatus
+      };
+    }
+  }else{
+    data.selesai=false;
+    delete data.selesaiStatus;
+    jadwal.push(data);
+  }
+
+  simpanData();
+  tanggalAktif=dariKey(tanggal);
+  resetForm();
+  render();
+  $('pesanForm').textContent='Jadwal berhasil disimpan.';
+});
+
+$('weekGrid').addEventListener('click',function(e){
+  const el=e.target.closest('[data-date]');
+  if(!el)return;
+  tanggalAktif=dariKey(el.dataset.date);
+  render();
+});
+
+$('weekGrid').addEventListener('keydown',function(e){
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  const el=e.target.closest('[data-date]');
+  if(!el)return;
+  e.preventDefault();
+  tanggalAktif=dariKey(el.dataset.date);
+  render();
+});
+
+$('daftarJadwal').addEventListener('click',function(e){
+  const btn=e.target.closest('[data-action]');
+  if(!btn)return;
+
+  const id=btn.dataset.id;
+  const aksi=btn.dataset.action;
+  const index=jadwal.findIndex(j=>j.id===id);
+  if(index<0)return;
+
+  if(aksi==='toggle'){
+    jadwal[index].selesai=!jadwal[index].selesai;
+  }else if(aksi==='edit'){
+    bukaForm(id);
+    return;
+  }else if(aksi==='delete'){
+    if(!confirm('Yakin ingin menghapus jadwal ini?'))return;
+    jadwal.splice(index,1);
+  }
+
+  simpanData();
+  render();
+});
+
+function ubahMinggu(angka){
+  tanggalAktif.setDate(tanggalAktif.getDate()+angka*7);
+  render();
+}
+
+function keMingguIni(){
+  tanggalAktif=new Date();
+  tanggalAktif.setHours(0,0,0,0);
+  render();
+}
+
+function bukaLogout(){
+  $('logoutModal').classList.add('show');
+}
+
+function tutupLogout(){
+  $('logoutModal').classList.remove('show');
+}
+
+$('logoutModal').addEventListener('click',function(e){
+  if(e.target===$('logoutModal'))tutupLogout();
+});
+
+$('tanggalHariIni').textContent=new Date().toLocaleDateString('id-ID',{
+  weekday:'long',day:'numeric',month:'long',year:'numeric'
+});
+
+muatData();
+render();
+
+window.addEventListener('storage',function(e){
+  if(e.key===KEY_SCHEDULE){
+    muatData();
+    render();
+  }
+});
+</script>
+
+</body>
+</html>
